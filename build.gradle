@@ -17,6 +17,7 @@ dependencies {
 	//SpringBoot
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
 	//Lombok - for repeatable jobs
 	implementation 'org.projectlombok:lombok:1.18.22'
