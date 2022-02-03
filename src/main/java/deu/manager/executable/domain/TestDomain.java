@@ -22,7 +22,7 @@ public class TestDomain {
      * 고유 ID 값으로, 자동으로 생성됩니다.
      */
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     /**
      * 사용자의 이름입니다.
@@ -36,4 +36,3 @@ public class TestDomain {
     @Column(name = "pw", nullable = false)
     private String password;
 }
-
