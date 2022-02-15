@@ -152,3 +152,6 @@ fabric.properties
 .idea/codestream.xml
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij
+
+# Spring properties ignore - only examples are allowed to upload
+application.properties
