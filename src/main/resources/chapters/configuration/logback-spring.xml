@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--https://goddaehee.tistory.com/206?category=367461-->
+<configuration scan="false">
+    <springProfile name="local">
+        <property resource="logback-local.properties" />
+    </springProfile>
+    <springProfile name="dev">
+        <property resource="logback-dev.properties" />
+    </springProfile>
+
+    <property name="LOG_PATH" value="./logs/local" />
+    <property name="LOG_FILE_NAME" value="logfile" />
+    <property name="ERR_LOG_FILE_NAME" value="err_log" />
+    <property name="LOG_PATTERN" value="%-5level [%d{yy-MM-dd HH:mm:ss}](%thread) <%logger{0}:%line> - %msg%n" />
+
+    <!-- Console log appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File log appender -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 파일 설정 -->
+        <file>${LOG_PATH}/${LOG_FILE_NAME}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+
+        <!-- Rolling 정책 설정 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>15MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 일 단위 로그파일 보관주기 -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="Error"/>
+    </root>
+
+</configuration>
+
+
