@@ -16,7 +16,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE major
 (
     id              INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-    name            VARCHAR(64) NOT NULL
+    name            VARCHAR(64) NOT NULL UNIQUE
 );
 
 CREATE TABLE staff_class
@@ -67,7 +67,7 @@ CREATE TABLE lecture
     professor       INT(10) NOT NULL ,
     max_student     INT(5) NOT NULL ,
     min_student     INT(5) NOT NULL ,
-    is_opened       BOOLEAN ,
+    is_opened       BOOLEAN DEFAULT 0,
     FOREIGN KEY (professor) REFERENCES professor(id)
 );
 
@@ -77,7 +77,7 @@ CREATE TABLE lecture_listener
     lecture_id      INT(10) NOT NULL ,
     student_id      INT(10) NOT NULL ,
     bills_price     INT(11) DEFAULT(0) ,
-    is_billed       BOOLEAN,
+    is_billed       BOOLEAN DEFAULT 0,
     FOREIGN KEY (lecture_id) REFERENCES lecture(id),
     FOREIGN KEY (student_id) REFERENCES student(id)
 );
