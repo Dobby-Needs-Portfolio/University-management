@@ -6,7 +6,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,24 +22,26 @@ import static org.assertj.core.api.Assertions.*;
 // https://pomo0703.tistory.com/100
 // https://www.amitph.com/testing-spring-data-jdbc/
 
-@DataJdbcTest
-@RunWith(SpringRunner.class)
-class AdminStaffJdbcRepositoryTest {
+
+//You should run this test after run database_init.sql and insert_example.sql at project/sql folder.
+@SpringBootTest @Transactional
+@WebAppConfiguration
+@RunWith(SpringJUnit4ClassRunner.class)
+public class AdminStaffJdbcRepositoryTest {
 
     @Autowired private AdminStaffRepository repository;
 
-    private AdminStaff adminStaff;
-
     @Before
     public void setup(){
-        adminStaff = AdminStaff.builder()
-                .id(1L)
+        AdminStaff adminStaff = AdminStaff.builder()
                 .name("TestName1")
                 .staffNum(321)
                 .residentNum("1112221231231")
                 .password("1221221").build();
 
-        repository.save(adminStaff);
+        try{
+            adminStaff = repository.save(adminStaff);
+        } catch(Throwable e) { assert false; }
     }
 
     //Read
@@ -45,7 +52,7 @@ class AdminStaffJdbcRepositoryTest {
 
         //검색 후, 데이터가 같은 지 확인
         assertThat(searched.isPresent()).isTrue();
-        assertThat(searched.get()).isEqualTo(adminStaff);
+        assertThat(searched.get().getName()).isEqualTo("어드민");
     }
 
     @Test
@@ -58,10 +65,17 @@ class AdminStaffJdbcRepositoryTest {
 
     @Test
     public void findByName_success(){
-        List<AdminStaff> searched = repository.findByName("TestName1");
+        List<AdminStaff> searched = repository.findByName("어드민");
+        AdminStaff target = AdminStaff.builder()
+                        .id(1L)
+                        .name("어드민")
+                        .password("admin_password")
+                        .staffNum(111)
+                        .residentNum("1111111111111").build();
 
         //리스트 내에 입력한 사람이 존재하는지 확인
-        assertThat(searched.contains(adminStaff)).isTrue();
+        assertThat(searched.stream().findAny().isPresent()).isTrue();
+        assertThat(searched.stream().findAny().get()).usingRecursiveComparison().isEqualTo(target);
     }
 
     @Test
@@ -80,27 +94,39 @@ class AdminStaffJdbcRepositoryTest {
                 .password("password")
                 .staffNum(122)
                 .residentNum("1112221231231").build();
+        AdminStaff savedObject = null;
+        Optional<AdminStaff> searchedObject = null;
+        try {
+            savedObject = repository.save(saveObject);
+            searchedObject = repository.findByStaffNum(122);
 
-        AdminStaff savedObject = repository.save(saveObject);
-        Optional<AdminStaff> searchedObject = repository.findByStaffNum(122);
-
-        assertThat(saveObject).isEqualTo(savedObject);
+        } catch (Throwable e) {
+            assert false;
+        }
+        assertThat(saveObject.getName()).isEqualTo(savedObject.getName());
         assertThat(searchedObject.isPresent()).isTrue();
-        assertThat(saveObject).isEqualTo(searchedObject.get());
+        assertThat(saveObject.getName()).isEqualTo(searchedObject.get().getName());
     }
 
     //Update
     @Test
     public void update(){
+
         Optional<AdminStaff> searched = repository.findById(1L);
         assertThat(searched.isPresent()).isTrue();
 
         AdminStaff editObject = searched.get();
         editObject.setName("TestNameEdit");
-        repository.update(editObject);
+        try {
+            repository.update(editObject);
+        } catch ( Throwable e ) {
+            assertThat(true).isFalse();
+        }
 
+        assertThat(repository.findByName("TestNameEdit").isEmpty()).isFalse();
         assertThat(repository.findByName("TestNameEdit")
-                .get(0)).isEqualTo(editObject);
+                .stream().findAny().get()).usingRecursiveComparison().isEqualTo(editObject);
+
     }
 
     //Delete
@@ -111,12 +137,15 @@ class AdminStaffJdbcRepositoryTest {
                 .password("password")
                 .staffNum(122)
                 .residentNum("1112221231231").build();
+        try {
+            AdminStaff toDelete = repository.save(save);
+            repository.delete(toDelete.getId());
 
-        AdminStaff toDelete = repository.save(save);
+            assertThat(repository.findById(toDelete.getId()).isPresent()).isFalse();
+        } catch (Throwable e) {
+            assert false;
+        }
 
-        repository.delete(toDelete.getId());
-
-        assertThat(repository.findById(toDelete.getId()).isPresent()).isFalse();
     }
 
     @Test
@@ -139,14 +168,18 @@ class AdminStaffJdbcRepositoryTest {
 
         List<Long> idListToDelete = new ArrayList<>();
 
-        idListToDelete.add(repository.save(save1).getId());
-        idListToDelete.add(repository.save(save2).getId());
-        idListToDelete.add(repository.save(save3).getId());
+        try {
+            idListToDelete.add(repository.save(save1).getId());
+            idListToDelete.add(repository.save(save2).getId());
+            idListToDelete.add(repository.save(save3).getId());
 
-        repository.delete(idListToDelete);
+            repository.delete(idListToDelete);
 
-        for (var id : idListToDelete){
-            assertThat(repository.findById(id).isPresent()).isFalse();
+            for (var id : idListToDelete){
+                assertThat(repository.findById(id).isPresent()).isFalse();
+            }
+        } catch (Throwable e) {
+            assert false;
         }
     }
 }
