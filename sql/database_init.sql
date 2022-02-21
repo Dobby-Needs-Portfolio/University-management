@@ -65,6 +65,7 @@ CREATE TABLE lecture
     lecture_num     INT(6) ZEROFILL NOT NULL UNIQUE ,
     name            VARCHAR(64) NOT NULL ,
     professor       INT(10) NOT NULL ,
+    credit_unit     INT(2) NOT NULL ,
     max_student     INT(5) NOT NULL ,
     min_student     INT(5) NOT NULL ,
     is_opened       BOOLEAN DEFAULT 0,
