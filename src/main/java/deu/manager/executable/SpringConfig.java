@@ -1,29 +1,26 @@
 package deu.manager.executable;
 
-import deu.manager.executable.repository.MajorJdbcRepository;
-import deu.manager.executable.repository.MajorRepository;
+import deu.manager.executable.repository.AdminStaffJdbcRepository;
+import deu.manager.executable.repository.AdminStaffRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
-import javax.swing.*;
-import javax.xml.crypto.Data;
 
-/**
- * Test 환경에서 MajorRepository 를 Bean으로 설정하고 사용하기 위해서 만들어졌다.
- */
-@Component
+@Configuration
 public class SpringConfig {
 
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
+    @Autowired
     public SpringConfig(DataSource dataSource){
         this.dataSource = dataSource;
     }
 
     @Bean
-    public MajorRepository majorRepository(){
-        return new MajorJdbcRepository(dataSource);
+    public AdminStaffRepository adminStaffRepository(){
+        return new AdminStaffJdbcRepository(dataSource);
     }
-
 }
