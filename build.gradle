@@ -42,6 +42,9 @@ dependencies {
 
 	//Database connector - MariaDB
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:3.0.3'
+
+	//Database JDBC ORM Mapper
+	implementation 'org.simpleflatmapper:sfm-jdbc-jre9:8.2.3'
 }
 
 tasks.named('test') {
