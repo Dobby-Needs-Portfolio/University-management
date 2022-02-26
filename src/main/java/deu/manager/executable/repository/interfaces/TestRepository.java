@@ -1,11 +1,9 @@
-package deu.manager.executable.repository;
+package deu.manager.executable.repository.interfaces;
 
 import deu.manager.executable.domain.TestDomain;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
