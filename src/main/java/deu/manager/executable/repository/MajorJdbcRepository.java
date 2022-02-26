@@ -4,6 +4,7 @@ import deu.manager.executable.config.Tables;
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
 
 import deu.manager.executable.domain.Major;
+import deu.manager.executable.repository.interfaces.MajorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public class MajorJdbcRepository implements MajorRepository{
+public class MajorJdbcRepository implements MajorRepository {
 
     private final JdbcTemplate jdbc;
 

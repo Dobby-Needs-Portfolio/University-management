@@ -1,4 +1,4 @@
-package deu.manager.executable.repository;
+package deu.manager.executable.repository.interfaces;
 
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
 import deu.manager.executable.domain.Major;

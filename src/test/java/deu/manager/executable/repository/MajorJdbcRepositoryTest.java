@@ -1,10 +1,8 @@
 package deu.manager.executable.repository;
 
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
-import deu.manager.executable.domain.AdminStaff;
 import deu.manager.executable.domain.Major;
-import org.assertj.core.api.Assertions;
-import org.junit.Before;
+import deu.manager.executable.repository.interfaces.MajorRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -24,7 +21,8 @@ import static org.assertj.core.api.Assertions.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class MajorJdbcRepositoryTest {
 
-    @Autowired MajorRepository majorRepository;
+    @Autowired
+    MajorRepository majorRepository;
 
     @Test
     public void findById_success()  {

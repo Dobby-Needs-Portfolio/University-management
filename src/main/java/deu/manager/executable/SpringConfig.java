@@ -1,14 +1,13 @@
 package deu.manager.executable;
 
 import deu.manager.executable.repository.AdminStaffJdbcRepository;
-import deu.manager.executable.repository.AdminStaffRepository;
+import deu.manager.executable.repository.interfaces.AdminStaffRepository;
 import deu.manager.executable.repository.MajorJdbcRepository;
-import deu.manager.executable.repository.MajorRepository;
+import deu.manager.executable.repository.interfaces.MajorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 @Configuration

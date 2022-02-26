@@ -4,6 +4,7 @@ package deu.manager.executable.repository;
 import deu.manager.executable.config.Tables;
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
 import deu.manager.executable.domain.AdminStaff;
+import deu.manager.executable.repository.interfaces.AdminStaffRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class AdminStaffJdbcRepository implements AdminStaffRepository{
+public class AdminStaffJdbcRepository implements AdminStaffRepository {
     private final JdbcTemplate jdbc;
 
     @Autowired
