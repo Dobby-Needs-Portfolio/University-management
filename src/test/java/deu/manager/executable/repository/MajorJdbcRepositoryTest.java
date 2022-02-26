@@ -109,6 +109,7 @@ public class MajorJdbcRepositoryTest {
 
         // 없다는 것은 실패이다. -> TRUE
         assertThat(majorRepository.findByName("Test2").isEmpty()).isFalse();
+        assertThat(majorRepository.findByName("Test1").isEmpty()).isTrue();
 
         Optional<Major> searchedObject = majorRepository.findByName("Test2");
         assertThat(searchedObject.get().getId()).isEqualTo(savedObject.getId());
