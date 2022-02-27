@@ -5,13 +5,10 @@ package deu.manager.executable.repository;
 // https://www.amitph.com/testing-spring-data-jdbc/
 
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
-import deu.manager.executable.domain.AdminStaff;
 import deu.manager.executable.domain.ClassStaff;
-import junit.runner.Version;
-import org.assertj.core.api.Assertions;
+import deu.manager.executable.repository.interfaces.ClassStaffRepository;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

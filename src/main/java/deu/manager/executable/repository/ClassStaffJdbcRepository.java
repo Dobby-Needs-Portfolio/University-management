@@ -2,9 +2,8 @@ package deu.manager.executable.repository;
 
 import deu.manager.executable.config.Tables;
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
-import deu.manager.executable.domain.AdminStaff;
 import deu.manager.executable.domain.ClassStaff;
-import deu.manager.executable.domain.Major;
+import deu.manager.executable.repository.interfaces.ClassStaffRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -16,10 +15,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-public class ClassStaffJdbcRepository implements ClassStaffRepository{
+public class ClassStaffJdbcRepository implements ClassStaffRepository {
 
     private JdbcTemplate jdbc;
 
