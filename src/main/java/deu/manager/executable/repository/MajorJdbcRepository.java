@@ -119,7 +119,7 @@ public class MajorJdbcRepository implements MajorRepository {
      */
     @Override
     public void delete(Long id) {
-        jdbc.update("delete from major where id = ?;", id);
+        jdbc.update("delete from major where id = ?", id);
 
     }
 
