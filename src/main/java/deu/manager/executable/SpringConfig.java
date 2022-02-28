@@ -15,10 +15,14 @@ import javax.sql.DataSource;
 public class SpringConfig {
 
     private final DataSource dataSource;
+    private final LectureListenerRepository lectureListenerRepository;
+    private final MajorRepository majorRepository;
 
     @Autowired
     public SpringConfig(DataSource dataSource){
         this.dataSource = dataSource;
+        this.lectureListenerRepository = new LectureListenerJdbcRepository(dataSource);
+        this.majorRepository = new MajorJdbcRepository(dataSource);
     }
 
     @Bean
@@ -28,11 +32,21 @@ public class SpringConfig {
 
     @Bean
     public MajorRepository majorRepository(){
-        return new MajorJdbcRepository(dataSource);
+        return majorRepository;
     }
 
     @Bean
     public ClassStaffRepository classStaffRepository(){
         return new ClassStaffJdbcRepository(dataSource);
+    }
+
+    @Bean
+    public LectureListenerRepository lectureListenerRepository() {
+        return lectureListenerRepository;
+    }
+
+    @Bean
+    public StudentRepository studentRepository() {
+        return new StudentJdbcRepository(dataSource, lectureListenerRepository, majorRepository);
     }
 }
