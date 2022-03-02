@@ -27,7 +27,7 @@ public class Lecture {
      * 강좌 번호가 저장된 필드<br>
      * Database type - INT(6)
      */
-    int lectureNum;
+    Integer lectureNum;
 
     /**
      * 강좌 이름가 저장된 필드<br>
@@ -45,19 +45,25 @@ public class Lecture {
      * 강좌 최대 학생 수가 저장된 필드.
      * Database type - INT(5)
      */
-    int maxStudent;
+    Integer maxStudent;
 
     /**
      * 강좌 최소 학생 수가 저장된 필드.
      * Database type - INT(5)
      */
-    int minStudent;
+    Integer minStudent;
 
     /**
      * 강의 개설 여부가 저장된 필드.
      * Database type - TINYINT(1)
      */
-    boolean isOpened;
+    Boolean isOpened;
+
+    /**
+     * 강좌의 학점이 저장된 필드.<br>
+     * Database type - INT(2)
+     */
+    Integer creditUnit;
 
     /**
      * 강의를 듣는 학생들 리스트. lecture_listener 테이블에 저장되며, LazyFetcher 클래스 안에 캐스트됩니다.
