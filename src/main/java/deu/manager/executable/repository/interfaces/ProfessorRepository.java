@@ -2,7 +2,6 @@ package deu.manager.executable.repository.interfaces;
 
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
 import deu.manager.executable.domain.Professor;
-import deu.manager.executable.domain.Student;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +14,10 @@ public interface ProfessorRepository {
     void update(Professor param) throws DbInsertWrongParamException;
 
     //Read
-    Optional<Student> findById(Long id);
-    List<Student> findById(List<Long> id);
-    Optional<Student> findByProfessorNum(String name);
-    List<Student> findByName(String name);
+    Optional<Professor> findById(Long id);
+    List<Professor> findById(List<Long> id);
+    Optional<Professor> findByProfessorNum(String name);
+    List<Professor> findByName(String name);
 
     //Delete
     void delete(List<Long> id);
