@@ -30,22 +30,18 @@ import java.util.Optional;
 public class StudentJdbcRepository implements StudentRepository {
     private JdbcTemplate jdbc;
     private LectureListenerRepository llRepository;
-    private MajorRepository majorRepository;
 
     /**
      * StudentJdbcRepository 클래스의 생성자입니다. dependencies inject가 이루어져야 합니다.
      * @param dataSource DB 연결 정보를 담고 있는 dataSource
      * @param llRepository lecture_listener 테이블을 관리하는 repository instance
-     * @param majorRepository major 테이블을 관리하는 repository instance
      */
     @Autowired
     public StudentJdbcRepository(
             DataSource dataSource,
-            LectureListenerRepository llRepository,
-            MajorRepository majorRepository){
+            LectureListenerRepository llRepository){
         this.jdbc = new JdbcTemplate(dataSource);
         this.llRepository = llRepository;
-        this.majorRepository = majorRepository;
     }
 
     /**

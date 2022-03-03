@@ -47,6 +47,6 @@ public class SpringConfig {
 
     @Bean
     public StudentRepository studentRepository() {
-        return new StudentJdbcRepository(dataSource, lectureListenerRepository, majorRepository);
+        return new StudentJdbcRepository(dataSource, lectureListenerRepository);
     }
 }
