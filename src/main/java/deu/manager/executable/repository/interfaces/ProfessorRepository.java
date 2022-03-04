@@ -16,7 +16,8 @@ public interface ProfessorRepository {
     //Read
     Optional<Professor> findById(Long id);
     List<Professor> findById(List<Long> id);
-    Optional<Professor> findByProfessorNum(String name);
+    Optional<Professor> findByProfessorNum(Integer professorNum);
+
     List<Professor> findByName(String name);
 
     //Delete

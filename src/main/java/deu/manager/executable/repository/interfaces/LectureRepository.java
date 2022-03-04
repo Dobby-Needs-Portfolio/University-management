@@ -16,7 +16,7 @@ public interface LectureRepository {
     List<Lecture> searchById(List<Long> ids);
     Optional<Lecture> searchByLectureNum(Integer lectureNum);
     List<Lecture> searchByName(String name);
-    List<Lecture> searchByProfessor(Professor professor);
+    List<Lecture> searchByProfessor(Long id);
 
     //Update
     void update(Lecture update) throws DbInsertWrongParamException;

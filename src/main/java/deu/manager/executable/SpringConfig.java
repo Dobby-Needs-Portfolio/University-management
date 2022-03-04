@@ -16,13 +16,19 @@ public class SpringConfig {
 
     private final DataSource dataSource;
     private final LectureListenerRepository lectureListenerRepository;
+    private final LectureRepository lectureRepository;
+    private final StudentRepository studentRepository;
+    private final ProfessorRepository professorRepository;
     private final MajorRepository majorRepository;
 
     @Autowired
     public SpringConfig(DataSource dataSource){
         this.dataSource = dataSource;
         this.lectureListenerRepository = new LectureListenerJdbcRepository(dataSource);
-        this.majorRepository = new MajorJdbcRepository(dataSource);
+        this.lectureRepository = new LectureJdbcRepository(dataSource, lectureListenerRepository);
+        this.studentRepository = new StudentJdbcRepository(dataSource, lectureListenerRepository);
+        this.professorRepository = new ProfessorJdbcRepository(dataSource, lectureRepository);
+        this.majorRepository = new MajorJdbcRepository(dataSource, studentRepository, professorRepository);
     }
 
     @Bean
@@ -31,13 +37,13 @@ public class SpringConfig {
     }
 
     @Bean
-    public MajorRepository majorRepository(){
-        return majorRepository;
+    public ClassStaffRepository classStaffRepository(){
+        return new ClassStaffJdbcRepository(dataSource);
     }
 
     @Bean
-    public ClassStaffRepository classStaffRepository(){
-        return new ClassStaffJdbcRepository(dataSource);
+    public MajorRepository majorRepository(){
+        return majorRepository;
     }
 
     @Bean
@@ -47,11 +53,16 @@ public class SpringConfig {
 
     @Bean
     public StudentRepository studentRepository() {
-        return new StudentJdbcRepository(dataSource, lectureListenerRepository);
+        return studentRepository;
     }
 
     @Bean
-    public ProfessorRepository professorRepository(){
-        return new ProfessorJdbcRepository(dataSource,lectureListenerRepository,majorRepository /*,lectureRepository*/);
+    public LectureRepository lectureRepository() {
+        return lectureRepository;
+    }
+
+    @Bean
+    public ProfessorRepository professorRepository() {
+        return professorRepository;
     }
 }

@@ -6,10 +6,7 @@ import deu.manager.executable.config.exception.DbInsertWrongParamException;
 import deu.manager.executable.domain.Lecture;
 import deu.manager.executable.domain.Major;
 import deu.manager.executable.domain.Professor;
-import deu.manager.executable.domain.Student;
-import deu.manager.executable.repository.interfaces.LectureListenerRepository;
 import deu.manager.executable.repository.interfaces.LectureRepository;
-import deu.manager.executable.repository.interfaces.MajorRepository;
 import deu.manager.executable.repository.interfaces.ProfessorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,25 +28,21 @@ import java.util.Optional;
 public class ProfessorJdbcRepository implements ProfessorRepository {
 
     private JdbcTemplate jdbc;
-    private MajorRepository majorRepository;
-    private LectureListenerRepository llRepository;
+    private LectureRepository lectureRepository;
     //private LectureRepository lectureRepository;
+
 
     /**
      * ProfessorJdbcRepository 클래스의 생성자입니다. dependencies inject가 이루어져야 합니다.
      * @param dataSource DB 연결 정보를 담고 있는 dataSource
-     * @param llRepository lecture_listener 테이블을 관리하는 repository instance
-     * @param majorRepository major 테이블을 관리하는 repository instance
      * @param lectureRepository lecture 테이블을 관리하는 repository instance
      */
     @Autowired
     public ProfessorJdbcRepository(DataSource dataSource ,
-                                   LectureListenerRepository llRepository ,
-                                   MajorRepository majorRepository
+                                   LectureRepository lectureRepository
                                    /*LectureRepository lectureRepository*/){
         this.jdbc = new JdbcTemplate(dataSource);
-        this.llRepository = llRepository;
-        this.majorRepository = majorRepository;
+        this.lectureRepository = lectureRepository;
         //this.lectureRepository = lectureRepository;
     }
 
@@ -165,10 +158,6 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
 
     }
 
-
-
-
-
     /**
      * table ID를 사용해서 professor 테이블을 검색합니다.
      * @param id 검색하고자 하는 교수의 id
@@ -200,9 +189,7 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
 
         SqlParameterSource params = new MapSqlParameterSource().addValue("ids", ids);
 
-        List<Professor> professorList = namedJdbc.query(sql, params, professorRowMapper());
-
-        return professorList;
+        return namedJdbc.query(sql, params, professorRowMapper());
     }
 
 
@@ -230,10 +217,9 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
      */
     @Override
     public List<Professor> findByName(String name) {
-        List<Professor> result = jdbc.query("SELECT p.id , p.name , p.prof_num , p.password , p.resident_num , m.id , m.name " +
+        return jdbc.query("SELECT p.id , p.name , p.prof_num , p.password , p.resident_num , m.id , m.name " +
                 "FROM professor p " + "INNER JOIN major m ON p.major = m.id " +
                 "WHERE p.name = ?", professorRowMapper(), name);
-        return result;
     }
 
 
@@ -281,7 +267,7 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
                     .major(Major.builder()
                             .id(rs.getLong("m.id"))
                             .name(rs.getString("m.name")).build())
-                    .lectures(new LazyFetcher<Long,List<Lecture>>(prof_id,this.llRepository::searchLecture))
+                    .lectures(new LazyFetcher<>(prof_id,this.lectureRepository::searchByProfessor))
                     .build();
         });
     }

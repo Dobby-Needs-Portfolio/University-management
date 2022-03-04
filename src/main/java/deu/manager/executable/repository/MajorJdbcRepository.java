@@ -5,6 +5,8 @@ import deu.manager.executable.config.exception.DbInsertWrongParamException;
 
 import deu.manager.executable.domain.Major;
 import deu.manager.executable.repository.interfaces.MajorRepository;
+import deu.manager.executable.repository.interfaces.ProfessorRepository;
+import deu.manager.executable.repository.interfaces.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,7 +27,9 @@ public class MajorJdbcRepository implements MajorRepository {
     private final JdbcTemplate jdbc;
 
     @Autowired
-    public MajorJdbcRepository(DataSource dataSource){
+    public MajorJdbcRepository(DataSource dataSource,
+                               StudentRepository studentRepository,
+                               ProfessorRepository professorRepository){
         this.jdbc = new JdbcTemplate(dataSource);
     }
 
