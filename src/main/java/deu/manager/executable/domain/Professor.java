@@ -33,7 +33,7 @@ public class Professor {
      * 교수 번호가 저장된 필드<br>
      * Database type - SMALLINT(3)
      */
-    int professorNum;
+    Integer professorNum;
 
     /**
      * 교수 비밀번호가 저장된 필드<br>

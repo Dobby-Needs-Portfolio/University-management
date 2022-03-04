@@ -46,8 +46,9 @@ class TestRepository{
     public TestRepository(){
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.mariadb.jdbc.Driver");
-        dataSource.setUrl("jdbc:mariadb://localhost:3306/test");
-        dataSource.setUsername("root");
+        dataSource.setUrl("jdbc:mariadb://localhost:3306/toyproject");
+        dataSource.setUsername("toyproject");
+        dataSource.setPassword("12345");
         this.dataSource = dataSource;
         this.jdbc = new JdbcTemplate(dataSource);
     }

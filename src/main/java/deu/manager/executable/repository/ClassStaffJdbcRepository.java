@@ -91,8 +91,8 @@ public class ClassStaffJdbcRepository implements ClassStaffRepository {
 
         HashMap<String, Object> params = new HashMap<>();
         if(input.getName() != null) { params.put("name", input.getName());}
-        if(input.getName() != null) { params.put("password", input.getPassword());}
-        if(input.getName() != null) { params.put("resident_num", input.getResidentNum());}
+        if(input.getPassword() != null) { params.put("password", input.getPassword());}
+        if(input.getResidentNum() != null) { params.put("resident_num", input.getResidentNum());}
 
         boolean first = true;
         for(String key : params.keySet()){

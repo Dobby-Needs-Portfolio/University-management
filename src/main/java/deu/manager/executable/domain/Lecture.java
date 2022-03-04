@@ -2,13 +2,10 @@ package deu.manager.executable.domain;
 
 
 import deu.manager.executable.config.LazyFetcher;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
