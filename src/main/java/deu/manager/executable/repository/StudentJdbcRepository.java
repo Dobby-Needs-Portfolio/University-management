@@ -217,7 +217,7 @@ public class StudentJdbcRepository implements StudentRepository {
      * @param ids 삭제할 데이터들의 id 리스트
      */
     @Override
-    public void delete(List<Long> ids) {
+    public void delete(List<Long> ids) throws DbInsertWrongParamException {
         //https://xlffm3.github.io/spring%20data/jdbctemplate-passing-list-as-in-clause/
         NamedParameterJdbcTemplate namedJdbc = new NamedParameterJdbcTemplate(jdbc);
         SqlParameterSource param = new MapSqlParameterSource("ids", ids);
@@ -230,7 +230,7 @@ public class StudentJdbcRepository implements StudentRepository {
      * @param id 삭제할 데이터의 id
      */
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws DbInsertWrongParamException {
         llRepository.deleteStudent(id);
         jdbc.update("DELETE FROM student WHERE id = ?", id);
     }

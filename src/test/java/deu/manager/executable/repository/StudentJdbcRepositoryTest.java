@@ -236,7 +236,7 @@ public class StudentJdbcRepositoryTest {
                 .name("학생입력")
                 .password("testPassword")
                 .residentNum("1231231112227")
-                .studentNum(001)
+                .studentNum(010)
                 .major(Major.builder()
                         .id(120L)
                         .name("학과2").build())
@@ -365,7 +365,7 @@ public class StudentJdbcRepositoryTest {
     //Delete
     @Test
     @DisplayName("delete - success")
-    public void delete_success(){
+    public void delete_success() throws DbInsertWrongParamException {
         Optional<Student> searchedBefore = repository.findById(2L);
         assertThat(searchedBefore.isPresent()).isTrue();
 
@@ -377,7 +377,7 @@ public class StudentJdbcRepositoryTest {
 
     @Test
     @DisplayName("delete - multiple")
-    public void delete_multiple() {
+    public void delete_multiple() throws DbInsertWrongParamException {
         List<Student> searchedBefore = repository.findById(new ArrayList<>(Arrays.asList(2L, 3L)));
         assertThat(searchedBefore).hasSize(2);
 
