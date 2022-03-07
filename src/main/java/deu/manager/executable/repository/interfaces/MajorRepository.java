@@ -20,5 +20,5 @@ public interface MajorRepository {
     Optional<Major> findByName(String name);
 
     //Delete
-    void delete(Long id);
+    void delete(Long id) throws DbInsertWrongParamException;
 }

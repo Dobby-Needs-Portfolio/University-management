@@ -229,6 +229,8 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
      */
     @Override
     public void delete(List<Long> ids) {
+        this.lectureRepository.delete(ids);
+
         NamedParameterJdbcTemplate nameJdbc = new NamedParameterJdbcTemplate(jdbc);
         SqlParameterSource params = new MapSqlParameterSource("ids", ids);
 
@@ -246,10 +248,9 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
 
     @Override
     public void delete(Long id) {
-        // List<Long> findByProf_Id(Long prof_id )
-        //this.llRepository.deleteLecture(lectureRepository.findByProf_Id(id));
-        //void deleteByProf_Id(Long prof_id )
-        //this.lectureRepository.deleteByProf_Id(id);
+        //Delete dependency record first
+        this.lectureRepository.delete(id);
+
         jdbc.update("DELETE FROM professor WHERE id = ?", id);
 
     }

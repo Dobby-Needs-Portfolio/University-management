@@ -25,12 +25,16 @@ import java.util.Optional;
 public class MajorJdbcRepository implements MajorRepository {
 
     private final JdbcTemplate jdbc;
+    private final StudentRepository studentRepository;
+    private final ProfessorRepository professorRepository;
 
     @Autowired
     public MajorJdbcRepository(DataSource dataSource,
                                StudentRepository studentRepository,
                                ProfessorRepository professorRepository){
         this.jdbc = new JdbcTemplate(dataSource);
+        this.professorRepository = professorRepository;
+        this.studentRepository = studentRepository;
     }
 
 
@@ -122,9 +126,12 @@ public class MajorJdbcRepository implements MajorRepository {
      * @param id 삭제할 학과의 id
      */
     @Override
-    public void delete(Long id) {
-        jdbc.update("delete from major where id = ?", id);
+    public void delete(Long id) throws DbInsertWrongParamException{
+        //Delete dependency records first
+        this.studentRepository.delete(id);
+        this.professorRepository.delete(id);
 
+        jdbc.update("delete from major where id = ?", id);
     }
 
     private RowMapper<Major> majorRowMapper() {
