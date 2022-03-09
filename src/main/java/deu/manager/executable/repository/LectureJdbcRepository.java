@@ -337,16 +337,16 @@ public class LectureJdbcRepository implements LectureRepository {
             throw new DbInsertWrongParamException("Wrong param input: \"prof_Id\" cant be null when database update",
                     Tables.Lecture.getValue());
         }
-        // 교수가 담당하는 과목들 ll에서 모두 삭제
-        List<Long> ids = this.searchByProfessor(profId).stream().map(Lecture::getId).collect(Collectors.toList());
-        this.llRepository.deleteLecture(ids);
 
-        NamedParameterJdbcTemplate nameJdbc = new NamedParameterJdbcTemplate(jdbc);
-        SqlParameterSource params = new MapSqlParameterSource("ids", ids);
+        //Delete ll first
+        jdbc.update("DELETE ll FROM lecture_listener ll INNER JOIN lecture l on ll.lecture_id = l.id " +
+                "INNER JOIN professor p on l.professor = p.id " +
+                "WHERE p.id = ?", profId);
 
-        // 교수가 담당했던 강의 id로 강의 삭제
-        nameJdbc.update("DELETE FROM lecture where id in (:ids) ", params);
-
+        //And delete l
+        jdbc.update("DELETE l FROM lecture l " +
+                "INNER JOIN professor p on l.professor = p.id " +
+                "WHERE p.id = ?", profId);
     }
 
     @Override
@@ -356,22 +356,28 @@ public class LectureJdbcRepository implements LectureRepository {
                     Tables.Lecture.getValue());
         }
 
-        List<Long> toBeDeletedIds = new ArrayList<>();
-        for(Long id : profIds){
-            List<Long> lectureIds = this.searchByProfessor(id).stream().map(Lecture::getId).collect(Collectors.toList());
-            for(Long singleProf_lectureId : lectureIds){
-                toBeDeletedIds.add(singleProf_lectureId);
-            }
-        }
-
-
-        this.llRepository.deleteLecture(toBeDeletedIds);
-
         NamedParameterJdbcTemplate nameJdbc = new NamedParameterJdbcTemplate(jdbc);
-        SqlParameterSource params = new MapSqlParameterSource("ids", toBeDeletedIds);
+        //Solve method #1: use INNER JOIN on DELETE phrase
+        //https://foxlime.tistory.com/160
+        //Delete ll first
+        SqlParameterSource profIdParam = new MapSqlParameterSource("ids", profIds);
+        nameJdbc.update("DELETE ll FROM lecture_listener ll INNER JOIN lecture l on ll.lecture_id = l.id " +
+                "INNER JOIN professor p on l.professor = p.id " +
+                "WHERE p.id IN (:ids)", profIdParam);
 
-        nameJdbc.update("DELETE FROM lecture where id in (:ids) ", params);
+        //And delete l
+        nameJdbc.update("DELETE l FROM lecture l " +
+                "INNER JOIN professor p on l.professor = p.id " +
+                "WHERE p.id IN (:ids)", profIdParam);
 
+//        //Solve method #2: SELECT once to get ID and delete
+//        List<Long> lectureId = nameJdbc.query("SELECT l.id AS id FROM lecture l " +
+//                "INNER JOIN professor p on l.professor = p.id " +
+//                "WHERE p.id IN (:ids)", profIdParam, (rs, rowNum) -> rs.getLong("id"));
+//
+//        this.llRepository.deleteLecture(lectureId);
+//        MapSqlParameterSource lectureIdsParam = new MapSqlParameterSource("ids", lectureId);
+//        nameJdbc.update("DELETE FROM lecture WHERE id IN (:ids)", lectureIdsParam);
     }
 
 
