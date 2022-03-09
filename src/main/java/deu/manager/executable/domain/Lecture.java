@@ -2,6 +2,7 @@ package deu.manager.executable.domain;
 
 
 import deu.manager.executable.config.LazyFetcher;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +19,7 @@ public class Lecture {
      * 강좌 테이블 고유 키. 자동으로 생성됩니다.<br>
      * Database type - INT(10)
      */
+    @Setter(AccessLevel.NONE)
     Long id;
 
     /**

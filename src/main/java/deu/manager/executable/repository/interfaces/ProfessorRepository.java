@@ -21,6 +21,6 @@ public interface ProfessorRepository {
     List<Professor> findByName(String name);
 
     //Delete
-    void delete(List<Long> id);
-    void delete(Long id);
+    void delete(List<Long> id) throws DbInsertWrongParamException;
+    void delete(Long id) throws DbInsertWrongParamException;
 }

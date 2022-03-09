@@ -387,7 +387,7 @@ public class ProfessorJdbcRepositoryTest {
     //Delete
     @Test
     @DisplayName("delete - success")
-    public void delete_success(){
+    public void delete_success() throws DbInsertWrongParamException {
         Optional<Professor> searchedBefore = repository.findById(2L);
         assertThat(searchedBefore.isPresent()).isTrue();
 
@@ -399,7 +399,7 @@ public class ProfessorJdbcRepositoryTest {
 
     @Test
     @DisplayName("delete - multiple")
-    public void delete_multiple() {
+    public void delete_multiple() throws DbInsertWrongParamException {
         List<Professor> searchedBefore = repository.findById(new ArrayList<>(Arrays.asList(1L, 2L)));
         assertThat(searchedBefore).hasSize(2);
 

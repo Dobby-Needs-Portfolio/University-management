@@ -1,6 +1,7 @@
 package deu.manager.executable.repository.interfaces;
 
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
+import deu.manager.executable.config.exception.DbUpdateRecordNotAvailable;
 import deu.manager.executable.domain.Lecture;
 import deu.manager.executable.domain.Professor;
 
@@ -19,9 +20,11 @@ public interface LectureRepository {
     List<Lecture> searchByProfessor(Long id);
 
     //Update
-    void update(Lecture update) throws DbInsertWrongParamException;
+    void update(Lecture update) throws DbInsertWrongParamException, DbUpdateRecordNotAvailable;
 
     //Delete
-    void delete(Long id);
-    void delete(List<Long> ids);
+    void delete(Long lectureId) throws DbInsertWrongParamException;
+    void delete(List<Long> lectureIds) throws DbInsertWrongParamException;
+    void deleteByProfId (Long profId) throws DbInsertWrongParamException;
+    void deleteByProfId (List<Long> profIds) throws DbInsertWrongParamException;
 }

@@ -228,7 +228,7 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
      * @param ids 삭제할 교수 데이터들의 id 리스트
      */
     @Override
-    public void delete(List<Long> ids) {
+    public void delete(List<Long> ids) throws DbInsertWrongParamException {
         this.lectureRepository.delete(ids);
 
         NamedParameterJdbcTemplate nameJdbc = new NamedParameterJdbcTemplate(jdbc);
@@ -247,7 +247,7 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws DbInsertWrongParamException {
         //Delete dependency record first
         this.lectureRepository.delete(id);
 

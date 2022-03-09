@@ -242,7 +242,7 @@ public class LectureListenerJdbcRepository implements LectureListenerRepository 
                     Tables.LectureListener.getValue());
         }
 
-        jdbc.update("DELETE FROM lecture_listener WHERE student_id = ?", lectureId);
+        jdbc.update("DELETE FROM lecture_listener WHERE lecture_id = ?", lectureId);
     }
 
     /**

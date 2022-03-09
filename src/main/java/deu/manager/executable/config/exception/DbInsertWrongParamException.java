@@ -8,6 +8,7 @@ public class DbInsertWrongParamException extends Exception{
         super(Message);
         this.table = table;
     }
+
     public DbInsertWrongParamException(Throwable cause, String table ) {
         super(cause);
         this.table = table;
