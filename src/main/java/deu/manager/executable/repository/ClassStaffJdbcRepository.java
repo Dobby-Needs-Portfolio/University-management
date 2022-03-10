@@ -7,6 +7,7 @@ import deu.manager.executable.repository.interfaces.ClassStaffRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
@@ -19,7 +20,7 @@ import java.util.Optional;
 
 public class ClassStaffJdbcRepository implements ClassStaffRepository {
 
-    private JdbcTemplate jdbc;
+    private final JdbcTemplate jdbc;
 
     public ClassStaffJdbcRepository(DataSource dataSource){
         this.jdbc = new JdbcTemplate(dataSource);
@@ -109,12 +110,6 @@ public class ClassStaffJdbcRepository implements ClassStaffRepository {
     }
 
 
-
-
-
-
-
-
     /**
      * id를 통해 데이터베이스를 검색하는 메소드.
      * @param id 검색할 id
@@ -127,7 +122,6 @@ public class ClassStaffJdbcRepository implements ClassStaffRepository {
 
         return result.stream().findAny();
     }
-
 
 
     /**
@@ -145,7 +139,6 @@ public class ClassStaffJdbcRepository implements ClassStaffRepository {
     }
 
 
-
     /**
      * 수업 담당자의 이름을 통해 데이터베이스를 검색하는 메소드.
      * @param name 검색할 직원의 이름
@@ -153,22 +146,24 @@ public class ClassStaffJdbcRepository implements ClassStaffRepository {
      */
     @Override
     public List<ClassStaff> findByName(String name) {
-        List<ClassStaff> result = jdbc.query("select * from staff_class where name = ?", classStaffRowMapper(), name);
-        return result;
+        return jdbc.query("select * from staff_class where name = ?", classStaffRowMapper(), name);
     }
-
 
 
     /**
      * id를 통해 수업담당자의 데이터를 삭제하는 메소드. 여러 id가 List로 들어올 시, 반복시행함
-     * @param id 삭제할 직원의 id 리스트(수업담당자 번호는 입력 불가능)
+     * @param ids 삭제할 직원의 id 리스트(수업담당자 번호는 입력 불가능)
      */
     @Override
-    public void delete(List<Long> id) {
-        for(Long i :id){
-            this.delete(i);
+    public void delete(List<Long> ids) throws DbInsertWrongParamException {
+        if (ids == null){
+            throw new DbInsertWrongParamException("Wrong param input: \"ids\" cant be null when database delete", Tables.ClassStaff.getValue());
         }
 
+        NamedParameterJdbcTemplate namedJdbc = new NamedParameterJdbcTemplate(jdbc);
+        SqlParameterSource param = new MapSqlParameterSource("ids", ids);
+
+        namedJdbc.update("DELETE FROM staff_class WHERE id IN (:ids)", param);
     }
 
 
@@ -177,21 +172,18 @@ public class ClassStaffJdbcRepository implements ClassStaffRepository {
      * @param id 삭제할 직원의 id(직원번호는 입력 불가능)
      */
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws DbInsertWrongParamException {
+        if (id == null){
+            throw new DbInsertWrongParamException("Wrong param input: \"id\" cant be null when database delete", Tables.ClassStaff.getValue());
+        }
         jdbc.update("delete from staff_class where id = ?;", id);
     }
 
     private RowMapper<ClassStaff> classStaffRowMapper(){
-        return new RowMapper<ClassStaff>() {
-            @Override
-            public ClassStaff mapRow(ResultSet rs, int rowNum) throws SQLException {
-                ClassStaff classStaff = new ClassStaff(rs.getLong("id")
-                        ,rs.getString("name")
-                        ,rs.getInt("staff_num")
-                        ,rs.getString("password")
-                        ,rs.getString("resident_num"));
-                return classStaff;
-            }
-        };
+        return (rs, rowNum) -> new ClassStaff(rs.getLong("id")
+                ,rs.getString("name")
+                ,rs.getInt("staff_num")
+                ,rs.getString("password")
+                ,rs.getString("resident_num"));
     }
 }
