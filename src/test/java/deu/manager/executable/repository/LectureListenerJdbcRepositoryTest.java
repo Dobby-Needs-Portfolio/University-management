@@ -8,9 +8,6 @@ import deu.manager.executable.domain.Professor;
 import deu.manager.executable.domain.Student;
 import deu.manager.executable.repository.interfaces.LectureListenerRepository;
 import deu.manager.executable.repository.interfaces.LectureRepository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -27,18 +24,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
-@Transactional
+@SpringBootTest @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @RunWith(SpringJUnit4ClassRunner.class)
 @Sql(value = "LectureListenerTest_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class LectureListenerJdbcRepositoryTest {
     @Autowired LectureListenerRepository repository;
     @Autowired LectureRepository lectureRepository;
-
-    Logger logger = LogManager.getLogger(this.getClass());
 
     //Create
     @Test @DisplayName("save_success")
@@ -50,11 +44,11 @@ public class LectureListenerJdbcRepositoryTest {
 
         Lecture targetLecture = Lecture.builder()
                 .id(5L)
-                .lectureNum(005)
+                .lectureNum(5)
                 .name("강의5")
                 .professor(Professor.builder()
                         .id(2L)
-                        .professorNum(001)
+                        .professorNum(1)
                         .name("교수2")
                         .password("password")
                         .residentNum("1231231112221")
@@ -70,7 +64,7 @@ public class LectureListenerJdbcRepositoryTest {
 
         Student targetStudent = Student.builder()
                 .id(2L)
-                .studentNum(002)
+                .studentNum(2)
                 .lectureList(new LazyFetcher<>(2L, this.repository::searchLecture))
                 .major(Major.builder()
                         .id(1L)
@@ -109,7 +103,7 @@ public class LectureListenerJdbcRepositoryTest {
     public void searchStudent(){
         List<Student> searched = repository.searchStudent(1L);
 
-        ArrayList<Student> target = new ArrayList<Student>(Arrays.asList(
+        ArrayList<Student> target = new ArrayList<>(Arrays.asList(
                 Student.builder()
                         .id(1L)
                         .name("학생1")
@@ -143,11 +137,11 @@ public class LectureListenerJdbcRepositoryTest {
         ArrayList<Lecture> target = new ArrayList<>(Arrays.asList(
                 Lecture.builder()
                         .id(1L)
-                        .lectureNum(001)
+                        .lectureNum(1)
                         .name("강의1")
                         .professor(Professor.builder()
                                 .id(1L)
-                                .professorNum(002)
+                                .professorNum(2)
                                 .name("교수1")
                                 .password("password")
                                 .residentNum("1231231112222")
@@ -162,12 +156,12 @@ public class LectureListenerJdbcRepositoryTest {
                         .studentList(new LazyFetcher<>(1L, this.repository::searchStudent)).build(),
                 Lecture.builder()
                         .id(2L)
-                        .lectureNum(002)
+                        .lectureNum(2)
                         .name("강의2")
                         .professor(Professor.builder()
                                 .id(2L)
                                 .name("교수2")
-                                .professorNum(001)
+                                .professorNum(1)
                                 .password("password")
                                 .residentNum("1231231112221")
                                 .lectures(null)
@@ -233,9 +227,9 @@ public class LectureListenerJdbcRepositoryTest {
         //Delete one
         {
             repository.deleteLecture(1L);
-            List<Student> searched = repository.searchStudent(1L);
+            List<Lecture> searched = repository.searchLecture(1L);
 
-            assertThat(searched.size()).isEqualTo(1);
+            assertThat(searched).size().isEqualTo(1);
         }
         //List delete
         {
@@ -245,8 +239,5 @@ public class LectureListenerJdbcRepositoryTest {
             assertThat(searched.isEmpty()).isTrue();
         }
     }
-
-
-
 
 }
