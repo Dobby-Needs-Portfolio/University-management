@@ -7,8 +7,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -22,25 +24,13 @@ import static org.assertj.core.api.Assertions.*;
 
 
 //You should run this test after run database_init.sql and insert_example.sql at project/sql folder.
-@SpringBootTest @Transactional
+@SpringBootTest @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @WebAppConfiguration
+@Sql(value = "AdminStaffTest_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class AdminStaffJdbcRepositoryTest {
 
     @Autowired private AdminStaffRepository repository;
-
-    @Before
-    public void setup(){
-        AdminStaff adminStaff = AdminStaff.builder()
-                .name("TestName1")
-                .staffNum(321)
-                .residentNum("1112221231231")
-                .password("1221221").build();
-
-        try{
-            adminStaff = repository.save(adminStaff);
-        } catch(Throwable e) { assert false; }
-    }
 
     //Read
     @Test
@@ -55,7 +45,7 @@ public class AdminStaffJdbcRepositoryTest {
 
     @Test
     public void findById_failed(){
-        Optional<AdminStaff> searched = repository.findById(2L);
+        Optional<AdminStaff> searched = repository.findById(3L);
 
         //검색 후, 데이터가 존재한다면 버그 발생
         assertThat(searched.isPresent()).isFalse();
@@ -110,7 +100,7 @@ public class AdminStaffJdbcRepositoryTest {
     @Test
     public void update(){
 
-        Optional<AdminStaff> searched = repository.findById(1L);
+        Optional<AdminStaff> searched = repository.findById(2L);
         assertThat(searched.isPresent()).isTrue();
 
         AdminStaff editObject = searched.get();
