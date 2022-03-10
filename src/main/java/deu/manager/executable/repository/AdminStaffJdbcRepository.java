@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
@@ -137,18 +138,19 @@ public class AdminStaffJdbcRepository implements AdminStaffRepository {
     }
 
     /**
-     * id를 통해 직원 데이터를 삭제하는 메소드. 여러 id가 List로 들어올 시, 반복시행함
-     * @param id 삭제할 직원의 id 리스트(직원번호는 입력 불가능)
+     * id를 통해 직원 데이터를 삭제하는 메소드.
+     * @param ids 삭제할 직원의 id 리스트(직원번호는 입력 불가능)
      */
     @Override
-    public void delete(List<Long> id) {
-        for (Long i : id){
-            this.delete(i);
-        }
+    public void delete(List<Long> ids) {
+        NamedParameterJdbcTemplate namedJdbc = new NamedParameterJdbcTemplate(jdbc);
+        SqlParameterSource param = new MapSqlParameterSource("ids", ids);
+
+        namedJdbc.update("DELETE FROM staff_admin WHERE id IN (:ids)", param);
     }
 
     /**
-     * id를 통해 직원 데이터를 삭제하는 메소드. 여러 id가 List로 들어올 시, 반복시행함
+     * id를 통해 직원 데이터를 삭제하는 메소드.
      * @param id 삭제할 직원의 id(직원번호는 입력 불가능)
      */
     @Override
