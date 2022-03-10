@@ -12,19 +12,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 
 //You should run this test after run database_init.sql and insert_example.sql at project/sql folder.
-@SpringBootTest
-@Transactional
+@SpringBootTest @Transactional(propagation = Propagation.NOT_SUPPORTED)
+@Sql(value = "ClassStaffTest_init.sql")
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ClassStaffJdbcRepositoryTest {
@@ -41,16 +44,11 @@ public class ClassStaffJdbcRepositoryTest {
     @Before
     public void setup() {
         classStaff = ClassStaff.builder()
+                .id(2L)
                 .name("직원2")
                 .staffNum(222)
                 .password("1221221")
                 .residentNum("1112221231231").build();
-
-        try {
-            classStaff = classStaffRepository.save(classStaff);
-        } catch (Throwable e) {
-            assert false;
-        }
     }
 
     @Test
@@ -130,15 +128,9 @@ public class ClassStaffJdbcRepositoryTest {
                 .password("123459")
                 .residentNum("111122223").build();
 
-        ClassStaff savedObject = null;
-        Optional<ClassStaff> searchedObject = null;
-        try {
-            savedObject = classStaffRepository.save(saveObject);
-            // 실제로 db에 잘 저장이 되었는지 확인해야 한다.
-            searchedObject = classStaffRepository.findById(savedObject.getId());
-        }catch(Throwable e){
-            assert false;
-        }
+        ClassStaff savedObject = classStaffRepository.save(saveObject);
+        // 실제로 db에 잘 저장이 되었는지 확인해야 한다.
+        Optional<ClassStaff> searchedObject = classStaffRepository.findById(savedObject.getId());
 
         assertThat(saveObject.getName()).isEqualTo(savedObject.getName());
         assertThat(searchedObject.isPresent()).isTrue();
@@ -149,39 +141,35 @@ public class ClassStaffJdbcRepositoryTest {
 
     //Update
     @Test
-    public void update(){
+    public void update() throws DbInsertWrongParamException {
 
         Optional<ClassStaff> searched = classStaffRepository.findById(1L);
         assertThat(searched.isPresent()).isTrue();
 
         ClassStaff editObject = searched.get();
         editObject.setName("직원4");
-        try {
-            classStaffRepository.update(editObject);
-        } catch ( Throwable e ) {
-            assertThat(true).isFalse();
-        }
 
-        assertThat(classStaffRepository.findByName("직원4").isEmpty()).isFalse();
-        assertThat(classStaffRepository.findByName("직원4")
-                .stream().findAny().get()).usingRecursiveComparison().isEqualTo(editObject);
+        classStaffRepository.update(editObject);
+
+        assertThat(classStaffRepository.findByName("직원4")).isNotEmpty();
+        Optional<ClassStaff> staff = classStaffRepository.findByName("직원4").stream().findAny();
+        assertThat(staff.isPresent()).isTrue();
+        assertThat(staff.get()).usingRecursiveComparison().isEqualTo(editObject);
 
     }
 
 
     //delete
     @Test
-    public void delete(){
+    public void delete() throws DbInsertWrongParamException {
 
         List<ClassStaff> searched = classStaffRepository.findByName("직원2");
 
-        try {
-            classStaffRepository.delete(searched.stream().findAny().get().getId());
+        Optional<ClassStaff> staff = searched.stream().findAny();
+        assertThat(staff.isPresent()).isTrue();
+        classStaffRepository.delete(staff.get().getId());
 
-            assertThat(classStaffRepository.findByName("직원2").stream().findAny().isPresent()).isFalse();
-        }catch(Throwable e){
-            assert false;
-        }
+        assertThat(classStaffRepository.findByName("직원2").stream().findAny().isPresent()).isFalse();
     }
 
 
@@ -198,21 +186,14 @@ public class ClassStaffJdbcRepositoryTest {
         classStaffRepository.save(save1);
 
         // "직원2" 2개 데이터의 id값을 list에 id담기
-        List<Long> idListToBeDelete = new ArrayList<>();
-        List<ClassStaff> sameNameList = classStaffRepository.findByName("직원2");
-
-        for(ClassStaff i : sameNameList){
-            idListToBeDelete.add(i.getId());
-        }
+        List<Long> deleteList = classStaffRepository.findByName("직원2").stream()
+                .map(ClassStaff::getId).collect(Collectors.toList());
 
         // Id 목록을 인자로 넣어야 한다.
-        classStaffRepository.delete(idListToBeDelete);
+        classStaffRepository.delete(deleteList);
 
         // 더 이상 동명이인이 없는것을 확인!
-        assertThat(classStaffRepository.findByName("직원2").stream().findAny().isEmpty()).isTrue();
-
+        assertThat(classStaffRepository.findByName("직원2")).isEmpty();
 
     }
-
-
 }
