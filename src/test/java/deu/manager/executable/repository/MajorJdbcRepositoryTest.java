@@ -1,16 +1,22 @@
 package deu.manager.executable.repository;
 
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
+import deu.manager.executable.domain.Lecture;
 import deu.manager.executable.domain.Major;
-import deu.manager.executable.repository.interfaces.MajorRepository;
+import deu.manager.executable.domain.Professor;
+import deu.manager.executable.domain.Student;
+import deu.manager.executable.repository.interfaces.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -19,10 +25,15 @@ import static org.assertj.core.api.Assertions.*;
 @Transactional
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
+@Sql(value = "LectureListenerTest_init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class MajorJdbcRepositoryTest {
 
-    @Autowired
-    MajorRepository majorRepository;
+    @Autowired MajorRepository majorRepository;
+    @Autowired StudentRepository studentRepository;
+    @Autowired ProfessorRepository professorRepository;
+    @Autowired LectureRepository lectureRepository;
+    @Autowired LectureListenerRepository lectureListenerRepository;
+
 
     @Test
     public void findById_success()  {
@@ -40,7 +51,7 @@ public class MajorJdbcRepositoryTest {
         Optional<Major> searched = majorRepository.findById(3L);
 
         //검색 후, 데이터가 존재한다면 버그 발생
-        assertThat(searched.isPresent()).isFalse();
+        assertThat(searched.isPresent()).isTrue();
     }
 
 
@@ -61,21 +72,21 @@ public class MajorJdbcRepositoryTest {
         Optional<Major> searched = majorRepository.findByName("학과3");
 
         //리스트 내에 결과가 존재한다면, 오류 발생
-        assertThat(searched.isEmpty()).isTrue();
+        assertThat(searched.isEmpty()).isFalse();
     }
 
 
     @Test
     public void saveTest() throws DbInsertWrongParamException {
         Major saveObject = Major.builder()
-                .name("학과3").build();
+                .name("학과4").build();
 
 
         Major savedObject = null;
         Optional<Major> searchedObject = null;
         try {
             savedObject = majorRepository.save(saveObject);
-            searchedObject = majorRepository.findByName("학과3");
+            searchedObject = majorRepository.findByName("학과4");
         } catch (Throwable e) {
             assert false;
         }
@@ -118,13 +129,30 @@ public class MajorJdbcRepositoryTest {
     //Delete
     @Test
     public void deleteTest() throws DbInsertWrongParamException {
-        Major major1 = new Major();
-        major1.setName("test1");
 
-        Major saved1 = majorRepository.save(major1);
-        majorRepository.delete(saved1.getId());
+        //학과 3L 삭제
+        majorRepository.delete(3L);
 
+        // 학과 3L 삭제 -> 학생 5L , 6L 삭제 -> 교수 3L 삭제 -> 강의 3L 삭제
+        //ll에서 확인
+        List<Student> students3 = lectureListenerRepository.searchStudent(3L);
+        assertThat(students3.stream().findAny().isPresent()).isFalse();
 
+        //lecture에서 확인
+        Optional<Lecture> lecture3 = lectureRepository.searchById(3L);
+        assertThat(lecture3.stream().findAny().isPresent()).isFalse();
+
+        // student에석 확인
+        List<Student> byId = studentRepository.findById(Arrays.asList(5L, 6L));
+        assertThat(byId.stream().findAny().isPresent()).isFalse();
+
+        //professor에서 확인
+        Optional<Professor> byId1 = professorRepository.findById(3L);
+        assertThat(byId1.stream().findAny().isPresent()).isFalse();
+
+        //major에서 확인
+        Optional<Major> byId2 = majorRepository.findById(3L);
+        assertThat(byId2.stream().findAny().isPresent()).isFalse();
     }
 
 
