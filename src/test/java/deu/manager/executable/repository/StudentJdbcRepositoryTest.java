@@ -1,8 +1,10 @@
 package deu.manager.executable.repository;
 
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
+import deu.manager.executable.domain.Lecture;
 import deu.manager.executable.domain.Major;
 import deu.manager.executable.domain.Student;
+import deu.manager.executable.repository.interfaces.LectureListenerRepository;
 import deu.manager.executable.repository.interfaces.StudentRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +31,8 @@ import static org.assertj.core.api.Assertions.*;
 @Sql(value = "StudentTest_Init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class StudentJdbcRepositoryTest {
     @Autowired StudentRepository repository;
+    @Autowired LectureListenerRepository llrepository;
+
     Logger logger = LogManager.getLogger(this.getClass());
 
     //Read
@@ -366,24 +370,71 @@ public class StudentJdbcRepositoryTest {
     @Test
     @DisplayName("delete - success")
     public void delete_success() throws DbInsertWrongParamException {
+
         Optional<Student> searchedBefore = repository.findById(2L);
         assertThat(searchedBefore.isPresent()).isTrue();
 
-        repository.delete(2L);
-        Optional<Student> searched = repository.findById(2L);
+        repository.delete(2L); // 2L 학생 삭제
 
-        assertThat(searched.isPresent()).isFalse();
+        List<Lecture> searchedLecture = llrepository.searchLecture(2L);
+        Optional<Student> searchedStudent = repository.findById(2L);
+
+        assertThat(searchedLecture.stream().findAny().isPresent()).isFalse();
+        assertThat(searchedStudent.isPresent()).isFalse();
     }
 
     @Test
-    @DisplayName("delete - multiple")
+    @DisplayName("delete - multiple students")
     public void delete_multiple() throws DbInsertWrongParamException {
         List<Student> searchedBefore = repository.findById(new ArrayList<>(Arrays.asList(2L, 3L)));
         assertThat(searchedBefore).hasSize(2);
 
         repository.delete(new ArrayList<>(Arrays.asList(2L, 3L)));
+
+        List<Lecture> lectures1 = llrepository.searchLecture(2L);
+        List<Lecture> lectures2 = llrepository.searchLecture(3L);
         List<Student> searched = repository.findById(new ArrayList<>(Arrays.asList(2L, 3L)));
+
+        assertThat(lectures1.stream().findAny().isPresent()).isFalse();
+        assertThat(lectures2.stream().findAny().isPresent()).isFalse();
         assertThat(searched.isEmpty()).isTrue();
     }
+
+    @Test
+    @DisplayName("delete by Major_id")
+    public void delete_By_Major_id() throws DbInsertWrongParamException {
+        // 학과 2L 인 학생 2L 데이터
+        Optional<Student> searchedBefore = repository.findById(2L);
+        assertThat(searchedBefore.isPresent()).isTrue();
+
+        repository.deleteByMajor(2L); // 학생 2L 삭제 예정
+
+        List<Lecture> lectures = llrepository.searchLecture(2L);
+        assertThat(lectures.stream().findAny().isPresent()).isFalse();
+
+        Optional<Student> searchedAfter = repository.findById(2L);
+        assertThat(searchedAfter.isPresent()).isFalse();
+
+    }
+
+    @Test
+    @DisplayName("delete by Major_ids")
+    public void delete_By_Major_ids() throws DbInsertWrongParamException {
+        // 학과 1L 인   학생 1L , 4L  데이터
+        List<Student> searchedBefore = repository.findById(Arrays.asList(1L, 4L));
+        assertThat(searchedBefore.size()).isEqualTo(2);
+
+        repository.deleteByMajor(1L); // 학생  1L , 4L 삭제 예정
+
+        List<Lecture> lectures1 = llrepository.searchLecture(1L);
+        List<Lecture> lectures4 = llrepository.searchLecture(4L);
+        assertThat(lectures1.stream().findAny().isPresent()).isFalse();
+        assertThat(lectures4.stream().findAny().isPresent()).isFalse();
+
+        List<Student> searchedAfter = repository.findById(Arrays.asList(1L, 4L));
+        assertThat(searchedAfter.stream().findAny().isPresent()).isFalse();
+
+    }
+
 
 }

@@ -235,6 +235,56 @@ public class StudentJdbcRepository implements StudentRepository {
         jdbc.update("DELETE FROM student WHERE id = ?", id);
     }
 
+    /**
+     * student 테이블에서 데이터를 삭제합니다.
+     * @param majorIds 삭제할 데이터들의 major_id 리스트
+     */
+    @Override
+    public void deleteByMajor(List<Long> majorIds) throws DbInsertWrongParamException {
+
+        if( majorIds == null) {
+            throw new DbInsertWrongParamException("Wrong param input: \"majorIds\" cant be null when database update",
+                    Tables.Student.getValue());
+        }
+        //delete inner join 사용 필요
+        //Major id로 ll 데이터 삭제
+        NamedParameterJdbcTemplate nameJdbc = new NamedParameterJdbcTemplate(jdbc);
+        SqlParameterSource majorParams = new MapSqlParameterSource("ids", majorIds);
+
+        nameJdbc.update("DELETE ll FROM lecture_listener ll INNER JOIN student s on ll.student_id = s.id " +
+                "WHERE s.major in (:ids) " , majorParams);
+
+
+        // Major id로 student 데이터 삭제
+        nameJdbc.update("DELETE s FROM student s " +
+                "WHERE s.major in (:ids)" , majorParams);
+
+
+    }
+
+    /**
+     * student 테이블에서 데이터를 삭제합니다.
+     * @param majorId 삭제할 데이터들의 major_id
+     */
+    @Override
+    public void deleteByMajor(Long majorId) throws DbInsertWrongParamException {
+
+        if( majorId == null) {
+            throw new DbInsertWrongParamException("Wrong param input: \"majorId\" cant be null when database update",
+                    Tables.Student.getValue());
+        }
+        //delete inner join 사용 필요
+        //Major id로 ll 데이터 삭제
+        jdbc.update("DELETE ll FROM lecture_listener ll INNER JOIN student s on ll.student_id = s.id " +
+                "WHERE s.major = ? ", majorId);
+
+        // Major id로 student 데이터 삭제
+        jdbc.update("DELETE s FROM student s " +
+                "WHERE s.major = ? ", majorId);
+
+    }
+
+
     private RowMapper<Student> studentRowMapper() {
         return ((rs, rowNum) -> {
             Long student_id = rs.getLong("s.id");
