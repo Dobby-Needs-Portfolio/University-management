@@ -128,8 +128,8 @@ public class MajorJdbcRepository implements MajorRepository {
     @Override
     public void delete(Long id) throws DbInsertWrongParamException{
         //Delete dependency records first
-        this.studentRepository.delete(id);
-        this.professorRepository.delete(id);
+        this.studentRepository.deleteByMajor(id);
+        this.professorRepository.deleteByMajor(id);
 
         jdbc.update("delete from major where id = ?", id);
     }
