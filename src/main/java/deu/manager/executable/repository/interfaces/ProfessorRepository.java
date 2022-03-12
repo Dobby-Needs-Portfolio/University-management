@@ -23,4 +23,7 @@ public interface ProfessorRepository {
     //Delete
     void delete(List<Long> id) throws DbInsertWrongParamException;
     void delete(Long id) throws DbInsertWrongParamException;
+
+    void deleteByMajor(List<Long> majorIds) throws DbInsertWrongParamException;
+    void deleteByMajor(Long majorId) throws DbInsertWrongParamException;
 }

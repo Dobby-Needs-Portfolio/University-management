@@ -225,14 +225,20 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
 
     /**
      * professor 테이블에서 데이터를 삭제합니다.
-     * @param ids 삭제할 교수 데이터들의 id 리스트
+     * @param profIds 삭제할 교수 데이터들의 id 리스트
      */
     @Override
-    public void delete(List<Long> ids) throws DbInsertWrongParamException {
-        this.lectureRepository.delete(ids);
+    public void delete(List<Long> profIds) throws DbInsertWrongParamException {
+
+        if( profIds == null) {
+            throw new DbInsertWrongParamException("Wrong param input: \"profIds\" cant be null when database update",
+                    Tables.Professor.getValue());
+        }
+
+        this.lectureRepository.deleteByProfId(profIds);
 
         NamedParameterJdbcTemplate nameJdbc = new NamedParameterJdbcTemplate(jdbc);
-        SqlParameterSource params = new MapSqlParameterSource("ids", ids);
+        SqlParameterSource params = new MapSqlParameterSource("ids", profIds);
 
         // 1. ll에 lecture_id로 강의 삭제 인자 -> List<Long> lectureId -> lecture에서 인자 -> List<Long> prof_id
         // List<Lecture> findByProf_Id(List<Long> prof_id )
@@ -246,12 +252,77 @@ public class ProfessorJdbcRepository implements ProfessorRepository {
 
     }
 
+    /**
+     * professor 테이블에서 데이터를 삭제합니다.
+     * @param profId 삭제할 교수 데이터들의 id
+     */
     @Override
-    public void delete(Long id) throws DbInsertWrongParamException {
-        //Delete dependency record first
-        this.lectureRepository.delete(id);
+    public void delete(Long profId) throws DbInsertWrongParamException {
 
-        jdbc.update("DELETE FROM professor WHERE id = ?", id);
+        if( profId == null) {
+            throw new DbInsertWrongParamException("Wrong param input: \"profId\" cant be null when database update",
+                    Tables.Professor.getValue());
+        }
+
+        //Delete dependency record first
+        this.lectureRepository.deleteByProfId(profId);
+
+        jdbc.update("DELETE FROM professor WHERE id = ?", profId);
+
+    }
+
+    /**
+     * professor 테이블에서 데이터를 삭제합니다.
+     * @param majorIds 삭제할 학과 데이터들의 major_id 리스트
+     */
+    @Override
+    public void deleteByMajor(List<Long> majorIds) throws DbInsertWrongParamException {
+
+        if( majorIds == null) {
+            throw new DbInsertWrongParamException("Wrong param input: \"majorIds\" cant be null when database update",
+                    Tables.Professor.getValue());
+        }
+        NamedParameterJdbcTemplate nameJdbc = new NamedParameterJdbcTemplate(jdbc);
+        SqlParameterSource majorParams = new MapSqlParameterSource("ids", majorIds);
+
+        // major로 ll 먼저 삭제
+        nameJdbc.update("DELETE ll FROM lecture_listener ll INNER JOIN lecture l on ll.lecture_id = l.id " +
+                "INNER JOIN professor p on p.id = l.professor " +
+                "WHERE p.major in (:ids) ", majorParams);
+
+        // major로 lecture 삭제
+        nameJdbc.update("DELETE l FROM lecture l INNER JOIN professor p on p.id = l.professor " +
+                "WHERE p.major in (:ids) ", majorParams);
+
+        // major로 prof 삭제
+        nameJdbc.update("DELETE p FROM professor p WHERE p.major in (:ids)" , majorParams);
+
+    }
+
+    /**
+     * professor 테이블에서 데이터를 삭제합니다.
+     * @param majorId 삭제할 학과 데이터들의 major_id
+     */
+    @Override
+    public void deleteByMajor(Long majorId) throws DbInsertWrongParamException {
+
+        if( majorId == null) {
+            throw new DbInsertWrongParamException("Wrong param input: \"majorId\" cant be null when database update",
+                    Tables.Professor.getValue());
+        }
+
+        // major로 ll 먼저 삭제
+        jdbc.update("DELETE ll FROM lecture_listener ll INNER JOIN lecture l on ll.lecture_id = l.id " +
+                "INNER JOIN professor p on p.id = l.professor " +
+                "WHERE p.major = ? ", majorId);
+
+        // major로 lecture 삭제
+        jdbc.update("DELETE l FROM lecture l INNER JOIN professor p on p.id = l.professor " +
+                "WHERE p.major = ? ", majorId);
+
+        // major로 prof 삭제
+        jdbc.update("DELETE p FROM professor p WHERE p.major = ?" , majorId);
+
 
     }
 

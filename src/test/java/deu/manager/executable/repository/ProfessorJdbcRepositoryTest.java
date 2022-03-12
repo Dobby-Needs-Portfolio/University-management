@@ -1,19 +1,19 @@
 package deu.manager.executable.repository;
 
 
-import com.jayway.jsonpath.internal.path.PredicatePathToken;
 import deu.manager.executable.config.exception.DbInsertWrongParamException;
+import deu.manager.executable.domain.Lecture;
 import deu.manager.executable.domain.Major;
 import deu.manager.executable.domain.Professor;
 import deu.manager.executable.domain.Student;
+import deu.manager.executable.repository.interfaces.LectureListenerRepository;
+import deu.manager.executable.repository.interfaces.LectureRepository;
 import deu.manager.executable.repository.interfaces.ProfessorRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
-import org.simpleflatmapper.map.property.OptionalProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
@@ -34,8 +34,10 @@ import static org.assertj.core.api.Assertions.*;
 @Sql(value = "professorTest_Init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class ProfessorJdbcRepositoryTest {
 
-    @Autowired
-    ProfessorRepository repository;
+    @Autowired ProfessorRepository repository;
+    @Autowired LectureRepository lectureRepository;
+    @Autowired LectureListenerRepository llrepository;
+
     Logger logger = LogManager.getLogger(this.getClass());
 
 
@@ -388,25 +390,108 @@ public class ProfessorJdbcRepositoryTest {
     @Test
     @DisplayName("delete - success")
     public void delete_success() throws DbInsertWrongParamException {
+
         Optional<Professor> searchedBefore = repository.findById(2L);
         assertThat(searchedBefore.isPresent()).isTrue();
 
         repository.delete(2L);
-        Optional<Professor> searchedAfter = repository.findById(2L);
 
+        // ll에서 삭제 확인 , 2L 교수가 담당한 강의 2L , 5L 삭제 예정
+        // 2L , 5L를 듣는 , 학생 1L, 2L, 5L 삭제
+        List<Student> students2 = llrepository.searchStudent(2L);
+        List<Student> students5 = llrepository.searchStudent(5L);
+
+        assertThat(students2.stream().findAny().isPresent()).isFalse();
+        assertThat(students5.stream().findAny().isPresent()).isFalse();
+
+        // lecture에서 2L 교수가 담당한 강의 2L , 5L 삭제 예정
+        List<Lecture> lectures2 = lectureRepository.searchByProfessor(2L);
+        assertThat(lectures2.stream().findAny().isPresent()).isFalse();
+
+        // professor에서 2L 삭제 예정
+        Optional<Professor> searchedAfter = repository.findById(2L);
         assertThat(searchedAfter.isPresent()).isFalse();
     }
 
     @Test
-    @DisplayName("delete - multiple")
+    @DisplayName("delete - multiple professor")
     public void delete_multiple() throws DbInsertWrongParamException {
         List<Professor> searchedBefore = repository.findById(new ArrayList<>(Arrays.asList(1L, 2L)));
         assertThat(searchedBefore).hasSize(2);
 
-        repository.delete(new ArrayList<>(Arrays.asList(1L, 2L)));
-        List<Professor> searched = repository.findById(new ArrayList<>(Arrays.asList(1L, 2L)));
+        //  1L , 3L 교수 삭제 예정
+        // 강의 1 , 3 , 4 삭제 예정
+        repository.delete(new ArrayList<>(Arrays.asList(1L, 3L)));
+
+        // ll에서 확인 , 강의 1 , 3 , 4를 듣는 학생 데이터도 함께 삭제
+        List<Student> students1 = llrepository.searchStudent(1L);
+        List<Student> students3 = llrepository.searchStudent(3L);
+        List<Student> students4 = llrepository.searchStudent(4L);
+
+        assertThat(students1.stream().findAny().isPresent()).isFalse();
+        assertThat(students3.stream().findAny().isPresent()).isFalse();
+        assertThat(students4.stream().findAny().isPresent()).isFalse();
+
+        // lecture에서 확인
+        List<Lecture> lectures = lectureRepository.searchById(Arrays.asList(1L, 3L, 4L));
+        assertThat(lectures.stream().findAny().isPresent()).isFalse();
+
+
+        //professor에서 확인
+        List<Professor> searched = repository.findById(new ArrayList<>(Arrays.asList(1L, 3L)));
         assertThat(searched.isEmpty()).isTrue();
     }
 
 
+    @Test
+    @DisplayName("delete by Major_id")
+    public void delete_by_major_id() throws DbInsertWrongParamException {
+        // 학과 3L 삭제 -> 교수 3L 삭제 -> 강의 3L 삭제 -> ll에서도 강의 3L삭제
+        this.repository.deleteByMajor(3L);
+
+        // ll에서 강의 3L 삭제
+        List<Student> students3 = llrepository.searchStudent(3L);
+        assertThat(students3.stream().findAny().isPresent()).isFalse();
+
+        // lecture에서 강의 3L 삭제
+        Optional<Lecture> lecture3 = lectureRepository.searchById(3L);
+        assertThat(lecture3.stream().findAny().isPresent()).isFalse();
+
+        // professor 3L 삭제
+        Optional<Professor> prof3 = this.repository.findById(3L);
+        assertThat(prof3.stream().findAny().isPresent()).isFalse();
+    }
+
+
+    @Test
+    @DisplayName("delete by Major_ids")
+    public void delete_by_major_ids() throws DbInsertWrongParamException {
+
+        //학과 2L , 3L 삭제 , 교수 2L , 3L 삭제 , 강의 2L,3L,5L 삭제
+        this.repository.deleteByMajor(Arrays.asList(2L ,3L));
+
+        //ll에서 확인
+        List<Student> students2 = llrepository.searchStudent(2L);
+        List<Student> Students3 = llrepository.searchStudent(3L);
+        List<Student> Students5 = llrepository.searchStudent(5L);
+
+        assertThat(students2.stream().findAny().isPresent()).isFalse();
+        assertThat(Students3.stream().findAny().isPresent()).isFalse();
+        assertThat(Students5.stream().findAny().isPresent()).isFalse();
+
+        // lecture에서 확인
+        Optional<Lecture> lecture2 = lectureRepository.searchById(2L);
+        Optional<Lecture> lecture3 = lectureRepository.searchById(3L);
+        Optional<Lecture> lecture5 = lectureRepository.searchById(5L);
+
+        assertThat(lecture2.stream().findAny().isPresent()).isFalse();
+        assertThat(lecture3.stream().findAny().isPresent()).isFalse();
+        assertThat(lecture5.stream().findAny().isPresent()).isFalse();
+
+
+        // professor에서 확인
+        List<Professor> professors = this.repository.findById(Arrays.asList(2L, 3L));
+        assertThat(professors.stream().findAny().isPresent()).isFalse();
+
+    }
 }
