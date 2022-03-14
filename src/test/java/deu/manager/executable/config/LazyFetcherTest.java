@@ -2,7 +2,6 @@ package deu.manager.executable.config;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,10 +12,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 
 
 import static org.assertj.core.api.Assertions.*;
@@ -45,10 +42,24 @@ class TestRepository{
 
     public TestRepository(){
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.mariadb.jdbc.Driver");
-        dataSource.setUrl("jdbc:mariadb://localhost:3306/toyproject");
-        dataSource.setUsername("toyproject");
-        dataSource.setPassword("12345");
+//        dataSource.setDriverClassName("org.mariadb.jdbc.Driver");
+//        dataSource.setUrl("jdbc:mariadb://localhost:3306/toyproject");
+//        dataSource.setUsername("toyproject");
+//        dataSource.setPassword("12345");
+
+        Properties properties = new Properties();
+
+        try{
+            // Read .property - https://www.netjstech.com/2017/09/how-to-read-properties-file-in-java.html
+            properties.load(getClass().getClassLoader().getResourceAsStream("application.properties"));
+            dataSource.setDriverClassName(properties.getProperty("spring.datasource.driver-class-name"));
+            dataSource.setUrl(properties.getProperty("spring.datasource.url"));
+            dataSource.setUsername(properties.getProperty("spring.datasource.username"));
+            dataSource.setPassword(properties.getProperty("spring.datasource.password"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         this.dataSource = dataSource;
         this.jdbc = new JdbcTemplate(dataSource);
     }
