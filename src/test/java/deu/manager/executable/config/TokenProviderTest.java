@@ -1,38 +1,27 @@
 package deu.manager.executable.config;
 
 import com.auth0.jwt.exceptions.*;
-import deu.manager.executable.SpringConfig;
 import deu.manager.executable.config.enums.Roles;
 import deu.manager.executable.config.enums.UserType;
-import net.bytebuddy.implementation.bind.MethodDelegationBinder;
-import org.apache.catalina.core.ApplicationContext;
+import deu.manager.executable.config.security.Token;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.dao.DataAccessException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@RunWith(SpringJUnit4ClassRunner.class)
 public class TokenProviderTest {
 
     private final String secretKey = "testKey";
-    JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(null,secretKey);
+    JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(null,secretKey, 1L);
 
     Logger logger = LogManager.getLogger(this.getClass());
 
@@ -40,39 +29,58 @@ public class TokenProviderTest {
     @Test
     @DisplayName("Create Token Test")
     public void CreateTokenTest(){
-
-        String token = jwtTokenProvider.createToken(1L, Collections.singletonList(Roles.ADMIN), UserType.AdminStaff.getValue());
+        String token = jwtTokenProvider.createToken(412L, Arrays.asList(Roles.ADMIN, Roles.USER), UserType.AdminStaff);
 
         System.out.println(token); //jwt.io에서 검사해야 합니다.
-
     }
 
+    @Test
+    @DisplayName("getAuthentication Method Test - success")
+    public void getAuthentication_Test(){
+        String token = "eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyMjAiLCJleHAiOjE3MTYyMzkwMjIsInVzZXJfdHlwZSI6InN0YWZmX2FkbWluIiwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVVNFUiJdfQ.KTgJkDPIbEK8cP4n0eq5GtRTrj_k9_XuhdGE7l4y2JVd36KnKdc9K6NpbysGU-Jf";
+
+        Authentication auth = jwtTokenProvider.getAuthentication(token);
+        Token targetToken = Token.builder()
+                .aud("220")
+                .roles(Arrays.asList(Roles.ADMIN, Roles.USER))
+                .userType(UserType.AdminStaff).build();
+        Authentication targetAuth = new UsernamePasswordAuthenticationToken(targetToken, "", targetToken.getAuthorities());
+
+        assertThat(auth).usingRecursiveComparison().isEqualTo(targetAuth);
+    }
 
     @Test
-    @DisplayName("getAuthentication Method Test")
-    public void getAuthentication_Test(){
-
-        String token = jwtTokenProvider.createToken(1L, Collections.singletonList(Roles.ADMIN), UserType.AdminStaff.getValue());
-
-        try {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-
-            // UserAuthToken과 DB의 데이터와 비교 해야하는 코드가 필요하다.
-
-
-        }catch(AlgorithmMismatchException a){
-            logger.warn("Algorithm Mis MatchException - Algorithm should be Algorithm.HMAC384");
-        }catch(SignatureVerificationException s){
-            logger.warn("SignatureVerificationException - Signature was forged");
-        }catch(TokenExpiredException t){
-            logger.warn("TokenExpiredException - Token is Expired");
-        }catch(InvalidClaimException i){
-            logger.warn("InvalidClaimException - Token might miss Essential Claims");
-        }catch(JWTVerificationException j){
-            logger.fatal("JWTVerificationException - There are Big errors in Token ");
+    @DisplayName("getAuthentication Method test - exception(invalid token)")
+    public void getAuthenticationInvalid(){
+        // #1. Wrong payload token
+        {
+            String wrongToken = "eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZXhwIjoxOTE2MjM5MDIyfQ.8Pn71yx--oWbM05v-rC-0VRpnv8P-b-NhYGXka0I3L4vDSMrjkDkJULD6QoQCVf5";
+            assertThatThrownBy(() ->
+                    jwtTokenProvider.getAuthentication(wrongToken))
+                    .isInstanceOf(InvalidClaimException.class);
         }
+        // #2. Wrong signature token
+        {
+            String wrongToken = "eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyMjAiLCJleHAiOjE5MTYyMzkwMjIsInVzZXJfdHlwZSI6InN0YWZmX2FkbWluIiwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVVNFUiJdfQ.0OmLvqOXzJINLNAYUzo9b7fEpmX3gEWEMFhPlkgsUqgml61er-ocgTWR2M8SbroW";
+            assertThatThrownBy(() ->
+                    jwtTokenProvider.getAuthentication(wrongToken))
+                    .isInstanceOf(SignatureVerificationException.class);
+        }
+        // #3. Wrong algorithm type
+        {
+            String wrongToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyMjAiLCJleHAiOjE5MTYyMzkwMjIsInVzZXJfdHlwZSI6InN0YWZmX2FkbWluIiwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVVNFUiJdfQ.kJX0OB2BzNAIr5YJ13WfL1q3lKcaMIOPdEI-suuk1f8";
+            assertThatThrownBy(() ->
+                jwtTokenProvider.getAuthentication(wrongToken))
+                    .isInstanceOf(AlgorithmMismatchException.class);
+        }
+        // #4. Time expired token
+        {
+            String wrongToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzM4NCJ9.eyJhdWQiOiI0MTIiLCJ1c2VyX3R5cGUiOiJzdGFmZl9hZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiZXhwIjoxNjQ3NDU1MDExfQ.t0egZRCsA2buAZ01_RVnvz_f_UNRGB1z2uSo-v2StooKMgVntFGxlHrHN7dnb1Db";
 
-
+            assertThatThrownBy(() ->
+                jwtTokenProvider.getAuthentication(wrongToken))
+                    .isInstanceOf(TokenExpiredException.class);
+        }
     }
 
 
@@ -80,12 +88,10 @@ public class TokenProviderTest {
     @DisplayName("check User Type")
     public void getUserType_Test(){
 
-        String token = jwtTokenProvider.createToken(1L, Collections.singletonList(Roles.ADMIN), UserType.AdminStaff.getValue());
+        String token = jwtTokenProvider.createToken(1L, Collections.singletonList(Roles.ADMIN), UserType.AdminStaff);
 
         UserType userType = jwtTokenProvider.getUserType(token);
         assertThat(userType).isEqualTo(UserType.AdminStaff);
     }
-
-
 
 }
