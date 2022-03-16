@@ -51,7 +51,7 @@ public class JwtTokenProvider {
         // https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
         // JWT Token Format
         // Header -> alg = HS384, typ = JWT
-        // Payload -> aud = ${USER_ID}, exp = ${EXPIRE_TIME},
+        // Payload -> aud = ${USER_ID}, exp = ${EXPIRE_TIME}, user_type = ${USER_TYPE}, roles = ${ROLES_ARRAY}
         this.verifier = JWT.require(hmac384)
                 .acceptLeeway(5) // 시간 오차범위. +- 5초의 토큰 만료 예외 인정
                 .withClaim("alg", "HS384") // 알고리즘은 반드시 HS384여야함
@@ -89,8 +89,7 @@ public class JwtTokenProvider {
     public UserType getUserType(String token) throws NullPointerException{
         DecodedJWT decodedJWT = JWT.decode(token);
         Map<String, Claim> claims = decodedJWT.getClaims();
-        UserType userType = UserType.valueToUserType(claims.get("user_type").asString());
-        return userType;
+        return UserType.valueToUserType(claims.get("user_type").asString());
     }
 }
 
