@@ -1,0 +1,2 @@
+jwt.key = 'secret_key_example'
+jwt.expireMin = 45
