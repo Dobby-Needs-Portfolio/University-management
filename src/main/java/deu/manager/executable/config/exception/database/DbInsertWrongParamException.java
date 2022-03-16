@@ -1,4 +1,4 @@
-package deu.manager.executable.config.exception;
+package deu.manager.executable.config.exception.database;
 
 import lombok.Getter;
 

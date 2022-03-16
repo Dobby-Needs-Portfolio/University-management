@@ -1,6 +1,6 @@
 package deu.manager.executable.repository;
 
-import deu.manager.executable.config.exception.DbInsertWrongParamException;
+import deu.manager.executable.config.exception.database.DbInsertWrongParamException;
 import deu.manager.executable.domain.Lecture;
 import deu.manager.executable.domain.Major;
 import deu.manager.executable.domain.Professor;

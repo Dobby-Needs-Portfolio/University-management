@@ -1,13 +1,12 @@
 package deu.manager.executable.repository;
 
 import deu.manager.executable.config.LazyFetcher;
-import deu.manager.executable.config.Tables;
-import deu.manager.executable.config.exception.DbInsertWrongParamException;
+import deu.manager.executable.config.enums.Tables;
+import deu.manager.executable.config.exception.database.DbInsertWrongParamException;
 import deu.manager.executable.domain.Lecture;
 import deu.manager.executable.domain.Major;
 import deu.manager.executable.domain.Student;
 import deu.manager.executable.repository.interfaces.LectureListenerRepository;
-import deu.manager.executable.repository.interfaces.MajorRepository;
 import deu.manager.executable.repository.interfaces.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,7 +15,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.util.HashMap;

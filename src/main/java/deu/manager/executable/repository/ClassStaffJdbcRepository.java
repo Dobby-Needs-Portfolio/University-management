@@ -1,7 +1,7 @@
 package deu.manager.executable.repository;
 
-import deu.manager.executable.config.Tables;
-import deu.manager.executable.config.exception.DbInsertWrongParamException;
+import deu.manager.executable.config.enums.Tables;
+import deu.manager.executable.config.exception.database.DbInsertWrongParamException;
 import deu.manager.executable.domain.ClassStaff;
 import deu.manager.executable.repository.interfaces.ClassStaffRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,8 +12,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;

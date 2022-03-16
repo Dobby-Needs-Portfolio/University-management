@@ -4,7 +4,7 @@ package deu.manager.executable.repository;
 // https://pomo0703.tistory.com/100
 // https://www.amitph.com/testing-spring-data-jdbc/
 
-import deu.manager.executable.config.exception.DbInsertWrongParamException;
+import deu.manager.executable.config.exception.database.DbInsertWrongParamException;
 import deu.manager.executable.domain.ClassStaff;
 import deu.manager.executable.repository.interfaces.ClassStaffRepository;
 import org.junit.Before;
@@ -18,7 +18,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

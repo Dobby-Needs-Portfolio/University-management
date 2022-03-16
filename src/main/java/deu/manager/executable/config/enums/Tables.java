@@ -1,4 +1,4 @@
-package deu.manager.executable.config;
+package deu.manager.executable.config.enums;
 
 public enum Tables {
     AdminStaff("staff_admin"),
