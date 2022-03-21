@@ -30,9 +30,10 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             throws IOException, ServletException {
         try{
             String token = ((HttpServletRequest) request).getHeader("Authorization");
-
-            Authentication auth = tokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            if (token != null){
+                Authentication auth = tokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
         }
         catch (ClassCastException e){
             log.warn("ClassCastException occurred, Unacceptable request received from - " + request.getRemoteHost(), e);
