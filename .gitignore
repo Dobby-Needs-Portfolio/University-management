@@ -155,5 +155,5 @@ fabric.properties
 
 # Spring properties ignore - only examples are allowed to upload
 application.properties
-keylist.properties
+src/main/resources/keylist.properties
 logs

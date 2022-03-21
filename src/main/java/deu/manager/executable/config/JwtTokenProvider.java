@@ -67,6 +67,7 @@ public class JwtTokenProvider {
         this.verifier = JWT.require(hmac384)
                 //.acceptLeeway(5) // 시간 오차범위. +- 5초의 토큰 만료 예외 인정
                 .withAudience() // aud 클레임이 존재해야 함
+                .acceptExpiresAt(5L)
                 //.withClaimPresence("exp") // exp 클레임이 존재해야 함 //이거 쓰니까 Expired를 감지를 못함, 그냥 자르자
                 .withClaimPresence("user_type") // user_type 클레임이 존재해야 함
                 .withClaimPresence("roles") // roles 클레임이 존재해야 함
@@ -83,7 +84,7 @@ public class JwtTokenProvider {
      */
     public String createToken(Long userId, List<Roles> roles, UserType userType) {
         LocalDateTime expire = LocalDateTime.now().plusMinutes(expireTime); // Generates expire time: current time + expireTime
-        String[] mappedRoles = roles.stream().map(element -> "ROLE_" + element.getValue()).toArray(String[]::new); // Map all roles value to String Array
+        String[] mappedRoles = roles.stream().map(Roles::getValue).toArray(String[]::new); // Map all roles value to String Array
 
         return JWT.create()
                 .withAudience(userId.toString())                      // 토큰을 가지고 있을 사용자 정보. DB id
@@ -107,9 +108,11 @@ public class JwtTokenProvider {
         Optional<String> audience = verifiedJwt.getAudience().stream().findAny();  // extract audience from token
         UserType userType = UserType.valueToUserType(claims.get("user_type").asString());  // extract userType and map as UserType type
         List<Roles> roles = claims.get("roles").asList(String.class).stream()
-                .map(elem -> elem.replace("ROLE_", ""))
                 .map(Roles::valueToRoles).collect(Collectors.toList());//extract roles and map as Roles type
 
+        if (roles.isEmpty()) {
+            throw new InvalidClaimException("roles are not present");
+        }
         Token authGeneratedToken = Token.builder().aud(audience.orElseThrow(() -> new InvalidClaimException("aud is not present")))
                 .userType(userType).roles(roles).build();
 

@@ -37,11 +37,11 @@ public class TokenProviderTest {
     @Test
     @DisplayName("getAuthentication Method Test - success")
     public void getAuthentication_Test(){
-        String token = "eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyMjAiLCJleHAiOjE3MTYyMzkwMjIsInVzZXJfdHlwZSI6InN0YWZmX2FkbWluIiwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVVNFUiJdfQ.KTgJkDPIbEK8cP4n0eq5GtRTrj_k9_XuhdGE7l4y2JVd36KnKdc9K6NpbysGU-Jf";
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzM4NCJ9.eyJhdWQiOiI0MTIiLCJ1c2VyX3R5cGUiOiJzdGFmZl9hZG1pbiIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJleHAiOjgxMTQwODc0MDZ9.SpnuxhOIhtM4sEc92jZryWI-LtiEW4UFzdZ7fENXGUbG8R2O7tZjwQsIqQc_3Qdp";
 
         Authentication auth = jwtTokenProvider.getAuthentication(token);
         Token targetToken = Token.builder()
-                .aud("220")
+                .aud("412")
                 .roles(Arrays.asList(Roles.ADMIN, Roles.USER))
                 .userType(UserType.AdminStaff).build();
         Authentication targetAuth = new UsernamePasswordAuthenticationToken(targetToken, "", targetToken.getAuthorities());
