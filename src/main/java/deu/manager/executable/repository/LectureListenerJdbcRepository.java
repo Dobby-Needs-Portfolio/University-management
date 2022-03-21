@@ -139,6 +139,7 @@ public class LectureListenerJdbcRepository implements LectureListenerRepository 
      */
     @Override
     public void updatePrice(List<Long> studentId, Long lectureId, Integer price) throws DbInsertWrongParamException{
+        NamedParameterJdbcTemplate namedJdbc = new NamedParameterJdbcTemplate(this.jdbc);
         if(studentId == null) {
             throw new DbInsertWrongParamException("Wrong param input: \"student_id\" cant be null when database update",
                     Tables.LectureListener.getValue());
@@ -151,9 +152,13 @@ public class LectureListenerJdbcRepository implements LectureListenerRepository 
             throw new DbInsertWrongParamException("Wrong param input: \"price\" cant be null when database update", Tables.LectureListener.getValue());
         }
 
-        String sql = "UPDATE lecture_listener SET bills_price = ? " +
-                "WHERE student_id = ? AND lecture_id = ?";
-        jdbc.update(sql, price, studentId, lectureId);
+        String sql = "UPDATE lecture_listener SET bills_price = (:price) " +
+                "WHERE student_id IN (:ids) AND lecture_id = (:lectureId)";
+        SqlParameterSource param = new MapSqlParameterSource()
+                        .addValue("ids", studentId)
+                        .addValue("price", price)
+                        .addValue("lectureId",lectureId);
+        namedJdbc.update(sql, param);
     }
 
     /**
