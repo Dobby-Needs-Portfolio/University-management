@@ -38,7 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 // 리퀘스트 Authorization 매핑
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "auth/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .anyRequest().hasRole(Roles.USER.getValue())
                 .and()
                 // 필터 설정. JWT토큰 필터가 먼저 실행되고, 그 다음 UsernamePassword 필터가 실행됨
