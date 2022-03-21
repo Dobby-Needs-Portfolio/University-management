@@ -30,6 +30,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             throws IOException, ServletException {
         try{
             String token = ((HttpServletRequest) request).getHeader("Authorization");
+            // token이 존재하지 않을 경우 권한을 부여하지 않고 진행한다
             if (token != null){
                 Authentication auth = tokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
