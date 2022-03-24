@@ -3,6 +3,7 @@ package deu.manager.executable.config.security;
 import deu.manager.executable.config.JwtTokenProvider;
 import deu.manager.executable.config.enums.Roles;
 import deu.manager.executable.config.security.JwtAuthenticationFilter;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 // https://daddyprogrammer.org/post/636/springboot2-springsecurity-authentication-authorization/
 @RequiredArgsConstructor
 @Configuration
+@Api(tags = {"Auth"}, value = "user Authentication API")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenProvider tokenProvider;
 
@@ -39,15 +41,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 리퀘스트 Authorization 매핑
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/auth/login").permitAll()     //도메인 수정 - 도메인은 "/"으로 시작해야 함
+                .antMatchers(HttpMethod.GET, "/swagger-ui/index.html").permitAll()
                 .anyRequest().hasRole(Roles.USER.getValue())
                 .and()
                 // 필터 설정. JWT토큰 필터가 먼저 실행되고, 그 다음 UsernamePassword 필터가 실행됨
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
     }
 
+
     @Override //Ignore swagger resource
     public void configure(WebSecurity web){
-        web.ignoring().antMatchers("/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html",
-                "/webjars/**", "/swagger/**");
+        web.ignoring().antMatchers("/v2/api-docs", "/swagger-resources/**", "/swagger-ui/index.html",
+                        "/swagger-ui/index", "/swagger-ui.html", "/webjars/**", "/swagger/**")
+                .antMatchers(HttpMethod.OPTIONS, "/**");
     }
 }

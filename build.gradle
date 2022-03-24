@@ -29,6 +29,7 @@ sourceSets {
 dependencies {
 	//SpringBoot
 	implementation 'org.springframework.boot:spring-boot-starter' exclude module: 'spring-boot-starter-logging'
+	implementation 'org.springframework.boot:spring-boot-starter-parent:2.6.4' exclude module: 'spring-boot-starter-logging'
 	implementation 'org.springframework.boot:spring-boot-starter-web' exclude module: 'spring-boot-starter-logging'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa' exclude module: 'spring-boot-starter-logging'
 	implementation 'org.springframework.boot:spring-boot-starter-security' exclude module: 'spring-boot-starter-logging'
@@ -59,6 +60,9 @@ dependencies {
 
 	//JWT
 	implementation 'com.auth0:java-jwt:3.18.3'
+
+	//Swagger
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 }
 
 tasks {
