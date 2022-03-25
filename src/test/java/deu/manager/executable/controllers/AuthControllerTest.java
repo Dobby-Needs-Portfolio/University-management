@@ -47,7 +47,8 @@ public class AuthControllerTest {
         {
             String content = "{\"id\":\"H111\", \"password\":\"adminpw\"}";
             HttpHeaders reqHeader = new HttpHeaders();
-            // ContentType, Accept를 등록하지 않으면 에러가 남. 서버가 어떤 형식으로 리턴해야 할 지 모르기 때문.
+            // ContentType, Accept를 등록하지 않으면 에러가 남. 서버가 어떤 형식으로 리턴해야 할 지 모르기때문.
+            // https://webstone.tistory.com/66
             reqHeader.add("Content-Type", "application/json");
             reqHeader.add("Accept", "*/*");
 
