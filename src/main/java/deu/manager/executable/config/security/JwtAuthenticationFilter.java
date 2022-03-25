@@ -35,23 +35,23 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                 Authentication auth = tokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
+            chain.doFilter(request, response);
         }
         catch (ClassCastException e){
             log.warn("ClassCastException occurred, Unacceptable request received from - " + request.getRemoteHost(), e);
+            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         // JWT Exception
+        // Error code is specified in Bearer token ietf 5-2
+        // https://datatracker.ietf.org/doc/html/rfc6749#section-5.2
         catch (InvalidClaimException e){
-            log.warn("wrong format of token has received. InvalidClaimException occurred - ", e);
+            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid_scope");
         }
-        catch (TokenExpiredException e){
-            log.warn("expired token has received from ("+ request.getRemoteAddr() +") TokenExpiredException occurred - " , e) ;
-        }
-        catch (SignatureVerificationException e){
-            log.warn("Received token's signature is invalid - ", e);
+        catch (TokenExpiredException | SignatureVerificationException e){
+            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "invalid_grant");
         }
         catch (JWTVerificationException e){
-            log.warn("unexpected JWT exception occurred - ", e);
+            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internal_token_error");
         }
-        chain.doFilter(request, response);
     }
 }
