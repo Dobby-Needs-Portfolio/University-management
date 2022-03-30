@@ -2,11 +2,9 @@ package deu.manager.executable.controllers;
 
 import deu.manager.executable.config.exception.request.WrongBodyRequestException;
 import deu.manager.executable.services.UserAuthenticationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,30 +33,32 @@ public class AuthController {
      * @return 로그인한 사용자의 토큰 값
      */
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> loginJson(
+    public ResponseEntity<loginResponseModel> loginJson(
             @RequestBody Map<String, Object> requestBody
             ){
 
         String id = (String) requestBody.getOrDefault("id", null);
         String password = (String) requestBody.getOrDefault("password", null);
 
-        if(id == null || password == null) throw new WrongBodyRequestException();
-
-        String response = authenticationService.login(id, password);
-
-        return ResponseEntity.ok(response);
+        return login(id, password);
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<String> loginUrlEncoded(
+    public ResponseEntity<loginResponseModel> loginUrlEncoded(
             @ModelAttribute loginRequestModel request
     ){
         String id = request.id;
         String password = request.password;
 
+        return login(id, password);
+    }
+
+    private ResponseEntity<loginResponseModel> login(String id, String password) {
         if(id == null || password == null) throw new WrongBodyRequestException();
 
-        String response = authenticationService.login(id, password);
+        loginResponseModel response = loginResponseModel.builder()
+                .access_token(authenticationService.login(id, password))
+                .build();
 
         return ResponseEntity.ok(response);
     }
@@ -67,5 +67,10 @@ public class AuthController {
     static class loginRequestModel{
         String id;
         String password;
+    }
+
+    @Getter @Builder
+    static class loginResponseModel{
+        String access_token;
     }
 }
