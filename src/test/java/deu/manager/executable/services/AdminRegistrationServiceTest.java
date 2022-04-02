@@ -6,6 +6,7 @@ import deu.manager.executable.domain.Major;
 import deu.manager.executable.domain.Professor;
 import deu.manager.executable.domain.Student;
 import deu.manager.executable.repository.interfaces.ClassStaffRepository;
+import deu.manager.executable.repository.interfaces.MajorRepository;
 import deu.manager.executable.repository.interfaces.ProfessorRepository;
 import deu.manager.executable.repository.interfaces.StudentRepository;
 import org.apache.logging.log4j.LogManager;
@@ -35,6 +36,7 @@ public class AdminRegistrationServiceTest {
     @Autowired StudentRepository studentRepository;
     @Autowired ProfessorRepository professorRepository;
     @Autowired ClassStaffRepository classStaffRepository;
+    @Autowired MajorRepository majorRepository;
 
     Logger logger = LogManager.getLogger(this.getClass());
 
@@ -54,10 +56,10 @@ public class AdminRegistrationServiceTest {
                         .name("학과1").build())
                 .build();
 
-        //TODO: 테스트 오류 해결할것
-        //Student saved = adminRegistrationService.staffRegister(stu.getName(),stu.getStudentNum(),stu.getResidentNum(),stu.getMajor());
+        //TODO: 테스트 오류 해결할것 (complete 03/27 21:00)
+        Student saved = adminRegistrationService.stuRegister(stu.getName(),stu.getStudentNum(),stu.getResidentNum(),stu.getMajor().getId());
 
-        //assertThat(stu).usingRecursiveComparison().isEqualTo(saved);
+        assertThat(stu).usingRecursiveComparison().isEqualTo(saved);
 
     }
 
@@ -100,7 +102,7 @@ public class AdminRegistrationServiceTest {
                         .name("학과1").build())
                 .build();
 
-        Professor saved = adminRegistrationService.profRegister(prof.getName(),prof.getProfessorNum(),prof.getResidentNum(),prof.getMajor());
+        Professor saved = adminRegistrationService.profRegister(prof.getName(),prof.getProfessorNum(),prof.getResidentNum(),prof.getMajor().getId());
 
         assertThat(prof).usingRecursiveComparison().isEqualTo(saved);
 
@@ -122,7 +124,7 @@ public class AdminRegistrationServiceTest {
                 .build();
 
         assertThatThrownBy(() -> {
-            adminRegistrationService.profRegister(prof.getName(), prof.getProfessorNum(), prof.getResidentNum(), prof.getMajor());
+            adminRegistrationService.profRegister(prof.getName(), prof.getProfessorNum(), prof.getResidentNum(), prof.getMajor().getId());
             logger.warn("Exception not thrown - check essential field for registration");
         }).isInstanceOf(DbInsertWrongParamException.class);
 
