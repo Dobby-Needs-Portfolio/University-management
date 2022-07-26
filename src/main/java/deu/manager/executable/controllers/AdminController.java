@@ -1,5 +1,6 @@
 package deu.manager.executable.controllers;
 
+import deu.manager.executable.config.exception.database.DbInsertWrongParamException;
 import deu.manager.executable.domain.ClassStaff;
 import deu.manager.executable.domain.Major;
 import deu.manager.executable.domain.Professor;
@@ -38,7 +39,7 @@ public class AdminController {
     @PostMapping(value = "/student", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CreateStudentResponse> createStudent(
             @RequestBody(required = true) CreateStudentRequest requestBody
-            ) {
+            ) throws DbInsertWrongParamException {
         Student saved = adminService.stuRegister(
                     requestBody.name,
                     requestBody.studentNum,
@@ -91,7 +92,7 @@ public class AdminController {
     @PostMapping(value="/prof" , consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CreateProfResponse> createProf(
             @RequestBody(required = true) CreateProfRequest createProfRequest
-        ){
+        ) throws DbInsertWrongParamException {
 
         Professor saved = adminService.profRegister(
                 createProfRequest.name,
@@ -139,7 +140,7 @@ public class AdminController {
     @PostMapping("/classStaff")
     public ResponseEntity<CreateClassStaffResponse> createClassStaff(
             @RequestBody(required = true) CreateClassStaffRequest createClassStaffRequest
-    ){
+    ) throws DbInsertWrongParamException {
         ClassStaff saved = adminService.staffRegister(
                 createClassStaffRequest.name,
                 createClassStaffRequest.staffNum,
