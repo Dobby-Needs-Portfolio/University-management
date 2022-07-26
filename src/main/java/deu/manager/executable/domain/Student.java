@@ -2,9 +2,12 @@ package deu.manager.executable.domain;
 
 import deu.manager.executable.config.LazyFetcher;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,48 +15,31 @@ import java.util.Optional;
  * 학생 정보를 저장하는 도메인 클래스입니다.
  */
 
-@Getter @Setter @Builder @AllArgsConstructor
+@Entity @Getter @AllArgsConstructor @NoArgsConstructor @Builder
+@Table(name = "students")
 public class Student {
-    /**
-     * 학생 테이블 고유 키. 자동으로 생성됩니다.<br>
-     * Database type - INT(10)
-     */
-    @Setter(AccessLevel.NONE)
-    Long id;
 
-    /**
-     * 학생 이름이 저장된 필드<br>
-     * Database type - VARCHAR(64)
-     */
-    String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    /**
-     * 학생 번호가 저장된 필드<br>
-     * Database type - SMALLINT(3) UNSIGNED
-     */
-    Integer studentNum;
+    @Column(nullable = false)
+    private String name;
+    @Column(unique = true , nullable = false)
+    private Integer studentNum;
 
-    /**
-     * 로그인에 필요한 비밀번호가 저장된 필드<br>
-     * Database type - VARCHAR(128)
-     */
-    String password;
+    @Column(unique = true , nullable = false)
+    private String password;
 
-    /**
-     * 학생의 주민번호가 저장된 필드<br>
-     * Database type - VARCHAR(32)
-     */
-    String residentNum;
+    @Column(unique = true , nullable = false)
+    private String residentNum;
 
-    /**
-     * 학생의 학과가 저장된 필드. 학과 데이터베이스와 연결됩니다.<br>
-     * Database type - INT(10)
-     */
-    Major major;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_id" , nullable = false , foreignKey = @ForeignKey(name = "fk_student_to_major"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Major major;
 
-    /**
-     * 학생이 수강신청한 강의 리스트입니다. 강의 리스트, 강의 수강생 리스트와 연결됩니다.<br>
-     * Schema - student <- lecture_listener -> lecture
-     */
-    LazyFetcher<Long, List<Lecture>> lectureList;
+    @OneToMany(mappedBy = "student")
+    private Collection<LectureListener> lectures = new ArrayList<>();
+
 }

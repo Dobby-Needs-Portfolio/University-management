@@ -2,71 +2,56 @@ package deu.manager.executable.domain;
 
 
 import deu.manager.executable.config.LazyFetcher;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * 강좌 정보를 저장하는 도메인 클래스입니다.
  */
 
-@Getter @Setter @Builder
+@Entity @Getter @AllArgsConstructor @NoArgsConstructor @Builder
+@DynamicInsert // https://eocoding.tistory.com/71
+@Table(name = "lectures")
 public class Lecture {
-    /**
-     * 강좌 테이블 고유 키. 자동으로 생성됩니다.<br>
-     * Database type - INT(10)
-     */
-    @Setter(AccessLevel.NONE)
-    Long id;
 
-    /**
-     * 강좌 번호가 저장된 필드<br>
-     * Database type - INT(6)
-     */
-    Integer lectureNum;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    /**
-     * 강좌 이름가 저장된 필드<br>
-     * Database type - VARCHAR(64)
-     */
-    String name;
+    @Column(unique = true , nullable = false)
+    private Integer lectureNum;
 
-    /**
-     * 강좌 담당 교수가 저장된 필드. 외래키 형식으로 저장<br>
-     * Database type - INT(10)
-     */
-    Professor professor;
+    @Column(nullable = false)
+    private String name;
 
-    /**
-     * 강좌 최대 학생 수가 저장된 필드.
-     * Database type - INT(5)
-     */
-    Integer maxStudent;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "professor_id" , nullable = false , foreignKey = @ForeignKey(name = "fk_lecture_to_professor"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Professor professor;
 
-    /**
-     * 강좌 최소 학생 수가 저장된 필드.
-     * Database type - INT(5)
-     */
-    Integer minStudent;
+    @Column(nullable = false)
+    private Integer maxStudent;
 
-    /**
-     * 강의 개설 여부가 저장된 필드.
-     * Database type - TINYINT(1)
-     */
-    Boolean isOpened;
+    @Column(nullable = false)
+    private Integer minStudent;
 
-    /**
-     * 강좌의 학점이 저장된 필드.<br>
-     * Database type - INT(2)
-     */
-    Integer creditUnit;
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Boolean isOpened;
 
-    /**
-     * 강의를 듣는 학생들 리스트. lecture_listener 테이블에 저장되며, LazyFetcher 클래스 안에 캐스트됩니다.
-     * @see LazyFetcher
-     */
-    LazyFetcher<Long, List<Student>> studentList;
+    @Column(nullable = false)
+    private Integer creditUnit;
+
+    @OneToMany(mappedBy = "lecture")
+    private Collection<LectureListener> studentList = new ArrayList<>();
+
+
 }

@@ -1,4 +1,4 @@
-package deu.manager.executable.repository;
+package deu.manager.executable.repository.jdbc;
 
 import deu.manager.executable.config.LazyFetcher;
 import deu.manager.executable.config.enums.Tables;
@@ -279,7 +279,7 @@ public class LectureListenerJdbcRepository implements LectureListenerRepository 
                     .major(Major.builder()
                             .id(rs.getLong("m.id"))
                             .name(rs.getString("m.name")).build())
-                    .lectureList(new LazyFetcher<>(student_id, this::searchLecture))
+                    //.lectureList(new LazyFetcher<>(student_id, this::searchLecture))
                     .build();
         });
     }
@@ -309,8 +309,8 @@ public class LectureListenerJdbcRepository implements LectureListenerRepository 
                             .major(Major.builder()
                                     .id(rs.getLong("m.id"))
                                     .name(rs.getString("m.name"))
-                                    .build()).build())
-                    .studentList(new LazyFetcher<>(lectureId, this::searchStudent)).build();
+                                    .build()).build()).build();
+                    //.studentList(new LazyFetcher<>(lectureId, this::searchStudent)).build();
         });
     }
 }

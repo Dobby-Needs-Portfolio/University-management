@@ -2,23 +2,17 @@ package deu.manager.executable.domain;
 
 import lombok.*;
 
-import javax.persistence.Table;
+import javax.persistence.*;
 
-@Getter @Setter @Builder @AllArgsConstructor @NoArgsConstructor
-@Table(name = "major")
+@Entity @Getter @AllArgsConstructor @NoArgsConstructor @Builder
+@Table(name = "majors")
 public class Major {
 
-    /**
-     * 관리자 데이터베이스 고유 키. 자동으로 생성됩니다.<br>
-     *  Database type - INT(10)
-     */
-    @Setter(AccessLevel.NONE)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 관리자 이름이 저장된 필드<br>
-     * Database type - VARCHAR(64)
-     */
+    @Column(unique = true , nullable = false)
     private String name;
 
 }

@@ -2,60 +2,47 @@ package deu.manager.executable.domain;
 
 
 import deu.manager.executable.config.LazyFetcher;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * 교수 정보를 저장하는 도메인 클래스입니다.
  */
 
-@Getter @Setter @Builder
+@Entity @Getter @AllArgsConstructor @NoArgsConstructor @Builder
+@Table(name = "professors")
 public class Professor {
-    /**
-     * 교수 테이블 고유 키. 자동으로 생성됩니다.<br>
-     * Database type - INT(10)
-     */
-    @Setter(AccessLevel.NONE)
-    Long id;
 
-    /**
-     * 교수 이름이 저장된 필드<br>
-     * Database type - VARCHAR(64)
-     */
-    String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    /**
-     * 교수 번호가 저장된 필드<br>
-     * Database type - SMALLINT(3)
-     */
-    Integer professorNum;
+    @Column(nullable = false)
+    private String name;
 
-    /**
-     * 교수 비밀번호가 저장된 필드<br>
-     * Database type - VARCHAR(128)
-     */
-    String password;
+    @Column(unique = true , nullable = false)
+    private Integer professorNum;
 
-    /**
-     * 교수 주민번호가 저장된 필드<br>
-     * Database type - VARCHAR(32)
-     */
-    String residentNum;
+    @Column(unique = true , nullable = false)
+    private String password;
 
-    /**
-     * 교수의 학과가 저장된 필드. 학과 데이터베이스와 연결됩니다.<br>
-     * Database type - INT(10)
-     */
-    Major major;
+    @Column(unique = true , nullable = false)
+    private String residentNum;
 
-    /**
-     * 교수가 강의하는 강의의 담당 목록입니다. LazyFetcher에 저장됩니다.
-     * @see LazyFetcher
-     */
-    LazyFetcher<Long, List<Lecture>> lectures;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_id" , nullable = false , foreignKey = @ForeignKey(name = "fk_professor_to_major"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Major major;
+
+    @OneToMany(mappedBy = "professor")
+    private Collection<Lecture> lectures = new ArrayList<>();
+
+
 }

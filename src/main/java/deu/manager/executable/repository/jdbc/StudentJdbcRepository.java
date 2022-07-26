@@ -1,4 +1,4 @@
-package deu.manager.executable.repository;
+package deu.manager.executable.repository.jdbc;
 
 import deu.manager.executable.config.LazyFetcher;
 import deu.manager.executable.config.enums.Tables;
